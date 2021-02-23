@@ -220,6 +220,7 @@ int main() {
 
     // TEST QUERY AREA
     // input: char[]
+    //
     char *inputCategory = "Food & Drink";
     // Check that input category exists
     bool DNE = true; // Does not exist = true
