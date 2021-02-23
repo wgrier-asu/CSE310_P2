@@ -6,6 +6,32 @@ using namespace std;
 
 void printAppInfo(app_info *info);
 void printAppInfo(app_info info);
+void print_apps(bst *root);
+void print_apps_query(categories *cat);
+
+
+/* insertBST
+ * Description: inserts a new bst object into an existing BST
+ * Input: root of existing BST, new bst object
+ * */
+bst * insertBST(bst *root, app_info *info){
+    // Case 1: no BST has been established
+    if(root == nullptr) {
+        root = new bst[sizeof(bst)];
+        root->record = *info;
+        root->right = nullptr;
+        root->left = nullptr;
+    }
+    // Case 2: new object is greater than root, insert into right child
+    else if(strcmp(info->app_name,root->record.app_name) > 0){
+        root->right = insertBST(root->right, info);
+    }
+    // Case 3: new object is lesser than root, insert into left child
+    else{
+        root->left = insertBST(root->left, info);
+    }
+    return root;
+}
 
 int main() {
     // 1.1.1 BST for Categories
@@ -22,8 +48,6 @@ int main() {
         cin.getline(catName, CAT_NAME_LEN);
         strcpy(app_categories[i]->category, catName);
         app_categories[i]->root = nullptr;
-
-        cout << app_categories[i]->category <<endl;
     }
 
 
@@ -32,7 +56,6 @@ int main() {
     int m; // # of applications
     cin >> m;
     cin.get();
-    cout << "m = " << m << endl;
     // Initialize the BSTs
     for(int i=0; i<m; i++){
         // Create and fill app_info structure
@@ -53,14 +76,29 @@ int main() {
         cin >> newInfo->price;
         cin.get();
 
-        //printAppInfo(newInfo);
 
-        // Create BST
-        bst *newBST = new bst[sizeof(bst)];
-        newBST->record = *newInfo;
+        // Insert the new BST info into the correct category binary search tree
+        for(int i=0; i<n; i++){
+            if(strcmp(newInfo->category, app_categories[i]->category) == 0){
+                app_categories[i]->root = insertBST(app_categories[i]->root, newInfo);
+            }
+        }
 
 
     }
+
+    // Print_Apps Query
+    // input: char[]
+    char *inputCategory = "Medical";
+    // Check that input category exists
+    bool DNE = true; // Does not exist = true
+    for(int i=0; i<n; i++){
+        if(strcmp(app_categories[i]->category,inputCategory)==0){
+            DNE = false;
+            print_apps_query(app_categories[i]); // Print if category exists
+        }
+    }
+    if(DNE){cout << "Category <" << inputCategory << "> not found." << endl;}
 
 
 
@@ -72,6 +110,34 @@ int main() {
     return 0;
 }
 
+/* Query: Print_Apps category <category_name>
+ * Description: Recursive function; prints all apps within a given category by in-order traversal
+ * Input: root of a category's BST
+ * */
+void print_apps_query(categories *cat){
+    // Case 1: no apps in this category
+    if(cat->root == nullptr){
+        cout << "Category <" << cat->category << "> no apps found." << endl;
+    }
+    // Case 2: print all apps
+    else{
+        cout << "Category: <" << cat->category << ">" << endl;
+        print_apps(cat->root);
+    }
+}
+void print_apps(bst *root){
+    // Print left child's subtree
+    if(root->left != nullptr) print_apps(root->left);
+    // Print root app's name
+    cout << "\t" << root->record.app_name << endl;
+    // Print right child's subtree
+    if(root->right != nullptr) print_apps(root->right);
+}
+
+
+
+
+
 void printAppInfo(app_info *info){
     cout << info->category << endl;
     cout << info->app_name <<endl;
@@ -82,5 +148,9 @@ void printAppInfo(app_info *info){
 }
 void printAppInfo(app_info info){
     cout << info.category <<endl;
+    cout << info.app_name <<endl;
+    cout << info.version   << endl;
+    cout << info.size <<endl;
+    cout << info.units   <<endl;
     cout << info.price <<endl;
 }
