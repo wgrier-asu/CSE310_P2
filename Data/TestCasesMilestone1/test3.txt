@@ -1,0 +1,22 @@
+6
+Books
+Business
+Food & Drink
+Games
+Medical
+Social Networking
+1
+Food & Drink
+Fit Men Cook
+1.3
+81.8
+MB
+2.99
+5
+find max price apps "Food & Drink"
+find max price apps "Books"
+find max price apps "Medical"
+print-apps category "Food & Drink"
+print-apps category "Business"
+no report
+
