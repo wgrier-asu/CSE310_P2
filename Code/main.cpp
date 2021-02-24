@@ -6,6 +6,7 @@
 using namespace std;
 
 int getQType(string query, int qLength);
+void deleteBSTAll(bst *root);
 void printAppInfo(app_info *info);
 void printAppInfo(app_info info);
 void print_apps(bst *root);
@@ -14,7 +15,7 @@ void print_apps_query(categories *cat);
 int count(bst *root);
 int allocatePriceHeap(float heap[], int size, int pos, bst *root);
 void printIfPrice(bst *root, float priceKey);
-void buildMaxHeap(float heap[], int size);
+float * buildMaxHeap(float heap[], int size);
 void maxHeapify(float heap[], int pos, int size);
 float Max(float heap[]);
 int right(int p);
@@ -33,7 +34,7 @@ bst * find_max_price_query(categories *cat){
         int c = count(cat->root);
 
         // Allocate heap of size c and initialize with price data
-        float *heap = new float[c];
+        float heap[c];
         allocatePriceHeap(heap, c, 0, cat->root);
 
         // MaxHeapify the heap
@@ -41,25 +42,36 @@ bst * find_max_price_query(categories *cat){
 
         // Get maximum price in the category
         float maxPrice = Max(heap);
+        // Truncate to 2 decimal places only (currency format)
+        char temp[10];
+        sscanf(temp, "%.2f", maxPrice);
+        sscanf(temp, "%f", &maxPrice);
 
         // Search and print all apps with the maximum price
+        cout << "Category: <" << cat->category << ">" << endl;
         printIfPrice(cat->root, maxPrice);
     }
 }
-float Max(float heap[]){
-    return heap[0];
+float Max(float *heap){
+    float max = heap[0];
+    if(max<0.01) max = 0.0;
+    return max;
 }
 int count(bst *root){
     // Base Case
     if(root == nullptr) return 0;
     else{
-        int count_left = count(root->left);
-        int count_right = count(root->right);
+        int count_left = 0;
+        if(root->left != nullptr) count_left = count(root->left);
+
+        int count_right = 0;
+        if(root->right != nullptr) count_right = count(root->right);
+
         int sum = 1 + count_left + count_right;
         return sum;
     }
 }
-int allocatePriceHeap(float heap[], int size, int pos, bst *root){
+int allocatePriceHeap(float *heap, int size, int pos, bst *root){
     // Left Sub-tree
     if(root->left != nullptr){
         pos = allocatePriceHeap(heap, size, pos, root->left);
@@ -79,19 +91,20 @@ void printIfPrice(bst *root, float priceKey){
         printIfPrice(root->left, priceKey);
     }
     // Print Node if price matches priceKey
-    if(root->record.price == priceKey) cout << root->record.app_name <<endl;
+    if(root->record.price == priceKey) cout << "\t" << root->record.app_name <<endl;
     // Right Sub-tree
     if(root->right != nullptr){
         printIfPrice(root->right, priceKey);
     }
 }
-void buildMaxHeap(float heap[], int size){
+float * buildMaxHeap(float *heap, int size){
     int firstParent = floor(size/2);
     for(int i=firstParent; i>0; i--){
         maxHeapify(heap, i, size);
     }
+    return heap;
 }
-void maxHeapify(float heap[], int pos, int size){
+void maxHeapify(float *heap, int pos, int size){
     int l = left(pos)-1;
     int r = right(pos)-1;
     pos--;
@@ -140,7 +153,8 @@ bst * insertBST(bst *root, app_info *info){
         root->left = nullptr;
     }
     // Case 2: new object is greater than root, insert into right child
-    else if(strcmp(info->app_name,root->record.app_name) > 0){
+
+    else if(strcasecmp(info->app_name,root->record.app_name) > 0){
         root->right = insertBST(root->right, info);
     }
     // Case 3: new object is lesser than root, insert into left child
@@ -219,6 +233,7 @@ int main() {
     int q; // # of Queries
     cin.getline(tmp, tmpLength);
     sscanf(tmp, "%d", &q); // Get number of queries q
+    memset(tmp, 0, tmpLength);
 
     char *queries[q]; // Array of size q to store q queries
     for(int i=0; i<q; i++){
@@ -240,8 +255,9 @@ int main() {
         // find max price apps <category>
         else if(qType == 2){
             // Get input category from the query
-            int startOfCat = query.find("\"") + 1;
-            int catLength = query.length() - startOfCat - 1;
+            int startOfCat = query.find('\"') + 1;
+            int endOfCat = query.find('\"',startOfCat);
+            int catLength = endOfCat - startOfCat;
             string iCat = query.substr(startOfCat, catLength);
             const char *inputCategory = iCat.c_str();
 
@@ -255,10 +271,12 @@ int main() {
             }
             if(DNE){cout << "Category <" << inputCategory << "> not found." << endl;}
         }
+        // print-apps <category>
         else if(qType == 3){
             // Get input category from the query
-            int startOfCat = query.find("\"") + 1;
-            int catLength = query.length() - startOfCat - 1;
+            int startOfCat = query.find('\"') + 1;
+            int endOfCat = query.find('\"',startOfCat);
+            int catLength = endOfCat - startOfCat;
             string iCat = query.substr(startOfCat, catLength);
             const char *inputCategory = iCat.c_str();
 
@@ -293,18 +311,77 @@ int main() {
         currQ++;
     }
 
+    // Report Setting Output
+    // Get "no report" or "report" from stdin
+    cin.getline(tmp, tmpLength);
+    string temp = tmp;
+    int reportVal = temp.find("no");
+    bool report = true;
+    if(reportVal > -1 && reportVal < tmpLength) report = false;
+
+    if(report){
+        // BST Statistics:
+        cout << "BST Statistics" << endl;
+        for (int i=0; i<n; i++){
+            cout << "\t" << app_categories[i]->category << endl;
+
+            int totalCount = count(app_categories[i]->root);
+            cout << "\t\tTotal Nodes: " << totalCount << endl;
+
+            int height = log2(totalCount);
+            if(totalCount == 0) height = 0;
+            cout << "\t\tHeight: " << height << endl;
+
+            if(totalCount == 0){
+                cout << "\t\tNo Nodes Exist." << endl;
+            }
+            else if(height == 0){
+                cout << "\t\tNo Subtrees Exist." << endl;
+            }
+            else{
+                int countL = count(app_categories[i]->root->left);
+                int heightL = log2(countL);
+                if(countL == 0) heightL = 0;
+                cout << "\t\tHeight of Left Subtree: " << heightL << endl;
+
+                int countR = count(app_categories[i]->root->right);
+                int heightR = log2(countR);
+                if(countR == 0) heightR = 0;
+                cout << "\t\tHeight of Right Subtree: " << heightR << endl;
+            }
+        }
+
+        // Hash Table Statistics:
+
+        // find app <app_name> - hash v. BST running time comparison
+
+    }
 
 
 
 
 
 
+    // Free Memory and Exit
 
-
-
+    for(int i=0; i<n; i++){
+        if(app_categories[i]->root != nullptr) deleteBSTAll(app_categories[i]->root);
+    }
     delete [] *app_categories;
 
     return 0;
+}
+
+void deleteBSTAll(bst *root){
+    // Delete children recursively
+    if(root->left != nullptr) {
+        deleteBSTAll(root->left);
+    }
+    if(root->right != nullptr) {
+        deleteBSTAll(root->right);
+    }
+    // Delete Root
+    delete root;
 }
 
 

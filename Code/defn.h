@@ -1,6 +1,6 @@
-#define	CAT_NAME_LEN	25
-#define	APP_NAME_LEN	100 //originally 50
-#define	VERSION_LEN	20 // originally 10
+#define	CAT_NAME_LEN	50 // originally 25
+#define	APP_NAME_LEN	200 //originally 50
+#define	VERSION_LEN	30 // originally 10
 #define	UNIT_SIZE	3
 
 struct app_info{
