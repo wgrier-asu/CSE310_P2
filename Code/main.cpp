@@ -5,6 +5,7 @@
 
 using namespace std;
 
+int getQType(string query, int qLength);
 void printAppInfo(app_info *info);
 void printAppInfo(app_info info);
 void print_apps(bst *root);
@@ -203,8 +204,6 @@ int main() {
         sscanf(tmp, "%f", &newInfo->price);
         memset(tmp, 0, 100);
 
-
-
         // Insert the new BST info into the correct category binary search tree
         for(int i=0; i<n; i++){
             if(strcmp(newInfo->category, app_categories[i]->category) == 0){
@@ -215,23 +214,87 @@ int main() {
     }
 
 
+    // Read and Process Queries
+    int qLength = 200;
+    int q; // # of Queries
+    cin.getline(tmp, tmpLength);
+    sscanf(tmp, "%d", &q); // Get number of queries q
 
-
-
-    // TEST QUERY AREA
-    // input: char[]
-    //
-    char *inputCategory = "Food & Drink";
-    // Check that input category exists
-    bool DNE = true; // Does not exist = true
-    for(int i=0; i<n; i++){
-        if(strcmp(app_categories[i]->category,inputCategory)==0){
-            DNE = false;
-            find_max_price_query(app_categories[i]); // Print if category exists
-            print_apps_query(app_categories[i]); // Print if category exists
-        }
+    char *queries[q]; // Array of size q to store q queries
+    for(int i=0; i<q; i++){
+        queries[i] = new char[qLength];
+        cin.getline(queries[i], qLength); // Read each query into queries array
     }
-    if(DNE){cout << "Category <" << inputCategory << "> not found." << endl;}
+
+    // Select and process each query
+    int currQ = 0;
+    int qType = -1;
+    while(currQ < q){
+        string query = queries[currQ];
+        qType = getQType(query, qLength);
+        // Note: qType corresponds to ordered list found in P2 Description PDF on Canvas
+
+        if(qType == 1){
+
+        }
+        // find max price apps <category>
+        else if(qType == 2){
+            // Get input category from the query
+            int startOfCat = query.find("\"") + 1;
+            int catLength = query.length() - startOfCat - 1;
+            string iCat = query.substr(startOfCat, catLength);
+            const char *inputCategory = iCat.c_str();
+
+            // Process Query with <inputCategory>
+            bool DNE = true; // Does not exist = true
+            for(int i=0; i<n; i++){
+                if(strcmp(app_categories[i]->category,inputCategory)==0){
+                    DNE = false;
+                    find_max_price_query(app_categories[i]); // Print if category exists
+                }
+            }
+            if(DNE){cout << "Category <" << inputCategory << "> not found." << endl;}
+        }
+        else if(qType == 3){
+            // Get input category from the query
+            int startOfCat = query.find("\"") + 1;
+            int catLength = query.length() - startOfCat - 1;
+            string iCat = query.substr(startOfCat, catLength);
+            const char *inputCategory = iCat.c_str();
+
+            // Process Query with <inputCategory>
+            bool DNE = true; // Does not exist = true
+            for(int i=0; i<n; i++){
+                if(strcmp(app_categories[i]->category,inputCategory)==0){
+                    DNE = false;
+                    print_apps_query(app_categories[i]);
+                }
+            }
+            if(DNE){cout << "Category <" << inputCategory << "> not found." << endl;}
+        }
+        else if(qType == 4){
+
+        }
+        else if(qType == 5){
+
+        }
+        else if(qType == 6){
+
+        }
+        else if(qType == 7){
+
+        }
+        else{
+            cout << "--invalid query #" << currQ+1 << "--" << endl;
+        }
+
+
+        // Move to next query
+        currQ++;
+    }
+
+
+
 
 
 
@@ -245,6 +308,41 @@ int main() {
 }
 
 
+int getQType(string query, int qLength){
+    // qType = index found in ordered list in P2 description document
+    int qType = -1;
+    int loc = -1;
+
+    // 1. find app
+    loc = query.find("find app");
+    if(loc > -1 && loc < qLength) qType = 1;
+
+    // 2. find max price apps
+    loc = query.find("find max price apps");
+    if(loc > -1 && loc < qLength) qType = 2;
+
+    // 3. print-apps category
+    loc = query.find("print-apps category");
+    if(loc > -1 && loc < qLength) qType = 3;
+
+    // 4. find price free
+    loc = query.find("find price free");
+    if(loc > -1 && loc < qLength) qType = 4;
+
+    // 5-6. range
+    loc = query.find("range");
+    if(loc > -1 && loc < qLength) {
+        loc = query.find("price");
+        if(loc > -1 && loc < qLength) qType = 5; // range price
+        else qType = 6;                          // range app
+    }
+
+    // 7. delete
+    loc = query.find("delete");
+    if(loc > -1 && loc < qLength) qType = 7;
+
+    return qType;
+}
 
 
 /* Query: Print_Apps category <category_name>
