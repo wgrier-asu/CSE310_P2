@@ -1,175 +1,11 @@
 #include <iostream>
 #include <cstring>
-#include "defn.h"
-#include <math.h>
+#include <cstdio>
+#include <cmath>
+
+#include "util.h"
 
 using namespace std;
-
-int getQType(string query, int qLength);
-void deleteBSTAll(bst *root);
-void printAppInfo(app_info *info);
-void printAppInfo(app_info info);
-void print_apps(bst *root);
-void print_apps_query(categories *cat);
-
-int count(bst *root);
-int allocatePriceHeap(float heap[], int size, int pos, bst *root);
-void printIfPrice(bst *root, float priceKey);
-float * buildMaxHeap(float heap[], int size);
-void maxHeapify(float heap[], int pos, int size);
-float Max(float heap[]);
-int right(int p);
-int left(int p);
-int parent(int p);
-
-
-
-/* Returns the object(s) with the maximum price*/
-bst * find_max_price_query(categories *cat){
-    // Case 1: no BST has been established
-    if(cat->root == nullptr) cout << "Category <" << cat->category << "> no apps found." << endl;
-    // Case 2: Find the max and print
-    else{
-        // Get number of apps in the category
-        int c = count(cat->root);
-
-        // Allocate heap of size c and initialize with price data
-        float heap[c];
-        allocatePriceHeap(heap, c, 0, cat->root);
-
-        // MaxHeapify the heap
-        buildMaxHeap(heap, c);
-
-        // Get maximum price in the category
-        float maxPrice = Max(heap);
-        // Truncate to 2 decimal places only (currency format)
-        char temp[10];
-        sscanf(temp, "%.2f", maxPrice);
-        sscanf(temp, "%f", &maxPrice);
-
-        // Search and print all apps with the maximum price
-        cout << "Category: <" << cat->category << ">" << endl;
-        printIfPrice(cat->root, maxPrice);
-    }
-}
-float Max(float *heap){
-    float max = heap[0];
-    if(max<0.01) max = 0.0;
-    return max;
-}
-int count(bst *root){
-    // Base Case
-    if(root == nullptr) return 0;
-    else{
-        int count_left = 0;
-        if(root->left != nullptr) count_left = count(root->left);
-
-        int count_right = 0;
-        if(root->right != nullptr) count_right = count(root->right);
-
-        int sum = 1 + count_left + count_right;
-        return sum;
-    }
-}
-int allocatePriceHeap(float *heap, int size, int pos, bst *root){
-    // Left Sub-tree
-    if(root->left != nullptr){
-        pos = allocatePriceHeap(heap, size, pos, root->left);
-    }
-    // Root node
-    heap[pos] = root->record.price;
-    pos++;
-    // Right Sub-tree
-    if(root->right != nullptr){
-        pos = allocatePriceHeap(heap, size, pos, root->right);
-    }
-    return pos; // ensure position value is continuous throughout in-order traversal
-}
-void printIfPrice(bst *root, float priceKey){
-    // Left Sub-tree
-    if(root->left != nullptr){
-        printIfPrice(root->left, priceKey);
-    }
-    // Print Node if price matches priceKey
-    if(root->record.price == priceKey) cout << "\t" << root->record.app_name <<endl;
-    // Right Sub-tree
-    if(root->right != nullptr){
-        printIfPrice(root->right, priceKey);
-    }
-}
-float * buildMaxHeap(float *heap, int size){
-    int firstParent = floor(size/2);
-    for(int i=firstParent; i>0; i--){
-        maxHeapify(heap, i, size);
-    }
-    return heap;
-}
-void maxHeapify(float *heap, int pos, int size){
-    int l = left(pos)-1;
-    int r = right(pos)-1;
-    pos--;
-    // Note: subtraction is to adjust index from [1..n] to [0..n-1]
-
-    // Find the largest value's position
-    int largest = pos;
-    if(l <= size && heap[l] > heap[largest]){
-        largest = l;
-    }
-    if(r <= size && heap[r] > heap[largest]){
-        largest = r;
-    }
-
-    // Swap if current object is not the largest
-    if(largest != pos){
-        float temp = heap[pos];
-        heap[pos] = heap[largest];
-        heap[largest] = temp;
-        maxHeapify(heap, largest+1, size);
-    }
-}
-int left(int p){
-    return 2*p;
-}
-int right(int p){
-    return 2*p + 1;
-}
-int parent(int p){
-    return floor(p/2);
-}
-
-
-
-
-/* insertBST
- * Description: inserts a new bst object into an existing BST
- * Input: root of existing BST, new bst object
- * */
-bst * insertBST(bst *root, app_info *info){
-    // Case 1: no BST has been established
-    if(root == nullptr) {
-        root = new bst[sizeof(bst)];
-        root->record = *info;
-        root->right = nullptr;
-        root->left = nullptr;
-    }
-    // Case 2: new object is greater than root, insert into right child
-
-    else if(strcasecmp(info->app_name,root->record.app_name) > 0){
-        root->right = insertBST(root->right, info);
-    }
-    // Case 3: new object is lesser than root, insert into left child
-    else{
-        root->left = insertBST(root->left, info);
-    }
-    return root;
-}
-
-
-
-
-
-
-
 
 int main() {
     // 1.1.1 BST for Categories
@@ -185,7 +21,7 @@ int main() {
         app_categories[i] = new categories[sizeof(categories)];
         cin.getline(catName, CAT_NAME_LEN);
         strcpy(app_categories[i]->category, catName);
-        app_categories[i]->root = nullptr;
+        app_categories[i]->root = NULL;
     }
 
     // Store data in BSTs
@@ -269,7 +105,7 @@ int main() {
                     find_max_price_query(app_categories[i]); // Print if category exists
                 }
             }
-            if(DNE){cout << "Category <" << inputCategory << "> not found." << endl;}
+            if(DNE){cout << "Category " << inputCategory << " not found." << endl;}
         }
         // print-apps <category>
         else if(qType == 3){
@@ -288,7 +124,7 @@ int main() {
                     print_apps_query(app_categories[i]);
                 }
             }
-            if(DNE){cout << "Category <" << inputCategory << "> not found." << endl;}
+            if(DNE){cout << "Category " << inputCategory << " not found." << endl;}
         }
         else if(qType == 4){
 
@@ -365,105 +201,9 @@ int main() {
     // Free Memory and Exit
 
     for(int i=0; i<n; i++){
-        if(app_categories[i]->root != nullptr) deleteBSTAll(app_categories[i]->root);
+        if(app_categories[i]->root != NULL) deleteTree(app_categories[i]->root);
     }
     delete [] *app_categories;
 
     return 0;
-}
-
-void deleteBSTAll(bst *root){
-    // Delete children recursively
-    if(root->left != nullptr) {
-        deleteBSTAll(root->left);
-    }
-    if(root->right != nullptr) {
-        deleteBSTAll(root->right);
-    }
-    // Delete Root
-    delete root;
-}
-
-
-int getQType(string query, int qLength){
-    // qType = index found in ordered list in P2 description document
-    int qType = -1;
-    int loc = -1;
-
-    // 1. find app
-    loc = query.find("find app");
-    if(loc > -1 && loc < qLength) qType = 1;
-
-    // 2. find max price apps
-    loc = query.find("find max price apps");
-    if(loc > -1 && loc < qLength) qType = 2;
-
-    // 3. print-apps category
-    loc = query.find("print-apps category");
-    if(loc > -1 && loc < qLength) qType = 3;
-
-    // 4. find price free
-    loc = query.find("find price free");
-    if(loc > -1 && loc < qLength) qType = 4;
-
-    // 5-6. range
-    loc = query.find("range");
-    if(loc > -1 && loc < qLength) {
-        loc = query.find("price");
-        if(loc > -1 && loc < qLength) qType = 5; // range price
-        else qType = 6;                          // range app
-    }
-
-    // 7. delete
-    loc = query.find("delete");
-    if(loc > -1 && loc < qLength) qType = 7;
-
-    return qType;
-}
-
-
-/* Query: Print_Apps category <category_name>
- * Description: Recursive function; prints all apps within a given category by in-order traversal
- * Input: root of a category's BST
- * */
-void print_apps_query(categories *cat){
-    // Case 1: no apps in this category
-    if(cat->root == nullptr){
-        cout << "Category <" << cat->category << "> no apps found." << endl;
-    }
-    // Case 2: print all apps
-    else{
-        cout << "Category: <" << cat->category << ">" << endl;
-        print_apps(cat->root);
-    }
-}
-void print_apps(bst *root){
-    // Print left child's subtree
-    if(root->left != nullptr) print_apps(root->left);
-    // Print root app's name
-    cout << "\t" << root->record.app_name << endl;
-    // Print right child's subtree
-    if(root->right != nullptr) print_apps(root->right);
-}
-
-
-
-
-
-
-void printAppInfo(app_info *info){
-    cout << info->category << endl;
-    cout << info->app_name <<endl;
-    cout << info->version <<endl;
-    cout << info->size <<endl;
-    cout << info->units <<endl;
-    cout << info->price <<endl;
-}
-void printAppInfo(app_info info){
-    cout << info.category <<endl;
-    cout << info.app_name <<endl;
-    cout << info.version   << endl;
-    cout << info.size <<endl;
-    cout << info.units   <<endl;
-    cout << info.price <<endl;
 }
