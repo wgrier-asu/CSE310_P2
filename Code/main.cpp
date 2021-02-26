@@ -4,11 +4,12 @@
 #include <cmath>
 
 #include "util.h"
+#include "hash.h"
 
 using namespace std;
 
 int main() {
-    // 1.1.1 BST for Categories
+    // Create BST for Categories and Apps
     //      Forms an array of n categories with corresponding BSTs
     int n;     // number of categories
     cin >> n;  // get input
@@ -24,13 +25,20 @@ int main() {
         app_categories[i]->root = NULL;
     }
 
-    // Store data in BSTs
+    // Get # of Applications
     int tmpLength = 100;
     char *tmp = new char[tmpLength];
-
     int m; // # of applications
     cin.getline(tmp,tmpLength);
     sscanf(tmp, "%d", &m);
+
+    // Create Hash Table
+    hash_table_entry **hash_table;
+    int table_size = getHTSize(m);
+    hash_table = new hash_table_entry*[table_size*sizeof(hash_table_entry)];
+    for(int i=0; i<table_size; i++) hash_table[i] = NULL;
+
+
 
     // Initialize the BSTs
     for(int i=0; i<m; i++){
@@ -54,14 +62,24 @@ int main() {
         sscanf(tmp, "%f", &newInfo->price);
         memset(tmp, 0, 100);
 
-        // Insert the new BST info into the correct category binary search tree
+        // Create BST from app info
+        bst * newBST = new bst[sizeof(bst)];
+        newBST->record = *newInfo;
+        newBST->right = NULL;
+        newBST->left = NULL;
+
+        // Insert the new BST into the correct category's binary search tree
         for(int i=0; i<n; i++){
-            if(strcmp(newInfo->category, app_categories[i]->category) == 0){
-                app_categories[i]->root = insertBST(app_categories[i]->root, newInfo);
+            if(strcmp(newBST->record.category, app_categories[i]->category) == 0){
+                app_categories[i]->root = insertBST(app_categories[i]->root, newBST);
             }
         }
 
+        // Insert the new BST into the hash table
+        insertHash(hash_table, newBST);
     }
+
+
 
 
     // Read and Process Queries
@@ -85,8 +103,25 @@ int main() {
         qType = getQType(query, qLength);
         // Note: qType corresponds to ordered list found in P2 Description PDF on Canvas
 
+        // find app <app_name>
         if(qType == 1){
+            // Get input name from the query
+            int startOfCat = query.find('\"') + 1;
+            int endOfCat = query.find('\"',startOfCat);
+            int catLength = endOfCat - startOfCat;
+            string iCat = query.substr(startOfCat, catLength);
+            char *inputName = new char[APP_NAME_LEN];
+            strcpy(inputName, iCat.c_str());
 
+            // Find BST in the Hash Table
+            bst * search = searchHashTable(hash_table, inputName);
+
+            // Output
+            if(search == NULL) cout << "Application " << inputName << " not found." << endl;
+            else{
+                cout << "Found Application: " << inputName << endl;
+                printAppInfo(search->record);
+            }
         }
         // find max price apps <category>
         else if(qType == 2){
@@ -126,15 +161,19 @@ int main() {
             }
             if(DNE){cout << "Category " << inputCategory << " not found." << endl;}
         }
+        // find price free <category>
         else if(qType == 4){
 
         }
+        // range <category> price <low> <high>
         else if(qType == 5){
 
         }
+        // range <category> name <low> <high>
         else if(qType == 6){
 
         }
+        // delete <category> <app_name>
         else if(qType == 7){
 
         }
@@ -164,8 +203,7 @@ int main() {
             int totalCount = count(app_categories[i]->root);
             cout << "\t\tTotal Nodes: " << totalCount << endl;
 
-            int height = log2(totalCount);
-            if(totalCount == 0) height = 0;
+            int height = heightTree(app_categories[i]->root);
             cout << "\t\tHeight: " << height << endl;
 
             if(totalCount == 0){
@@ -175,14 +213,10 @@ int main() {
                 cout << "\t\tNo Subtrees Exist." << endl;
             }
             else{
-                int countL = count(app_categories[i]->root->left);
-                int heightL = log2(countL);
-                if(countL == 0) heightL = 0;
+                int heightL = heightTree(app_categories[i]->root->left);
                 cout << "\t\tHeight of Left Subtree: " << heightL << endl;
 
-                int countR = count(app_categories[i]->root->right);
-                int heightR = log2(countR);
-                if(countR == 0) heightR = 0;
+                int heightR = heightTree(app_categories[i]->root->right);
                 cout << "\t\tHeight of Right Subtree: " << heightR << endl;
             }
         }

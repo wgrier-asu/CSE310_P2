@@ -15,11 +15,14 @@ bst.o: bst.cc bst.h
 heap.o: heap.cc heap.h
 	g++ heap.cc heap.h -c
 
-hash.o: hash.cc
-	g++ hash.cc -c
+hash.o: hash.cc hash.h
+	g++ hash.cc hash.h -c
+
+prime.o: prime.cc prime.h
+	g++ prime.cc prime.h -c
 
 
 clean:
-	rm main.o
-	rm defn.h.gch
+	rm *.o
+	rm *.gch
 

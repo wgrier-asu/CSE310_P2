@@ -6,9 +6,11 @@
 #define CSE310_P2_BST_H
 #include "defn.h"
 
-bst * insertBST(bst *root, app_info *info);
+bst * insertBST(bst *root, bst *obj);
 int count(bst *root);
 void deleteTree(bst *root);
+void deleteNode(bst *node);
+int heightTree(bst *root);
 int left  (int p);
 int right (int p);
 int parent(int p);

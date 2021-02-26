@@ -17,22 +17,19 @@ int parent(int p){
  * Description: inserts a new bst object into an existing BST
  * Input: root of existing BST, new bst object
  * */
-bst * insertBST(bst *root, app_info *info){
+bst * insertBST(bst *root, bst *obj){
     // Case 1: no BST has been established
     if(root == NULL) {
-        root = new bst[sizeof(bst)];
-        root->record = *info;
-        root->right = NULL;
-        root->left = NULL;
+        root = obj;
         return root;
     }
     // Case 2: new object is greater than root, insert into right child
-    if(strcasecmp(info->app_name,root->record.app_name) > 0){
-        root->right = insertBST(root->right, info);
+    if(strcasecmp(obj->record.app_name,root->record.app_name) > 0){
+        root->right = insertBST(root->right, obj);
     }
     // Case 3: new object is lesser than root, insert into left child
     else{
-        root->left = insertBST(root->left, info);
+        root->left = insertBST(root->left, obj);
     }
     return root;
 }
@@ -55,6 +52,10 @@ int count(bst *root){
     }
 }
 
+void deleteNode(bst *node){
+    // do something
+}
+
 /* deleteTree
  * Description: deallocates memory of BST in post-order */
 void deleteTree(bst *root){
@@ -67,6 +68,19 @@ void deleteTree(bst *root){
     }
     // Delete Root
     delete root;
+}
+
+/* heightTree
+ * Description: returns the height of the tree's longest branch */
+int heightTree(bst *root){
+    if(root == NULL) return 0;
+    else{
+        int heightLeft  = 1 + heightTree(root->left);
+        int heightRight = 1 + heightTree(root->right);
+
+        if(heightLeft > heightRight) return heightRight;
+        else return heightLeft;
+    }
 }
 
 

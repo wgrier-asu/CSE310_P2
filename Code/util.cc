@@ -24,11 +24,11 @@ void print_app_names(bst *root){
 void print_apps_query(categories *cat){
     // Case 1: no apps in this category
     if(cat->root == NULL){
-        cout << "Category <" << cat->category << "> no apps found." << endl;
+        cout << "Category " << cat->category << " no apps found." << endl;
     }
         // Case 2: print all apps
     else{
-        cout << "Category: <" << cat->category << ">" << endl;
+        cout << "Category: " << cat->category << endl;
         print_app_names(cat->root);
     }
 }
@@ -148,20 +148,20 @@ int getQType(string query, int qLength){
 /* printAppInfo
  * Description: prints all data within an app_info object */
 void printAppInfo(app_info *info){
-    cout << info->category << endl;
-    cout << info->app_name <<endl;
-    cout << info->version <<endl;
-    cout << info->size <<endl;
-    cout << info->units <<endl;
-    cout << info->price <<endl;
+    cout << "\t" << info->category << endl;
+    cout << "\t" << info->app_name <<endl;
+    cout << "\t" << info->version <<endl;
+    cout << "\t" << info->size <<endl;
+    cout << "\t" << info->units <<endl;
+    cout << "\t" << info->price <<endl;
 }
 /* printAppInfo
  * Description: prints all data within an app_info object */
 void printAppInfo(app_info info){
-    cout << info.category <<endl;
-    cout << info.app_name <<endl;
-    cout << info.version   << endl;
-    cout << info.size <<endl;
-    cout << info.units   <<endl;
-    cout << info.price <<endl;
+    cout << "\t" << info.category <<endl;
+    cout << "\t" << info.app_name <<endl;
+    cout << "\t" << info.version   << endl;
+    cout << "\t" << info.size <<endl;
+    cout << "\t" << info.units   <<endl;
+    cout << "\t" << info.price <<endl;
 }
