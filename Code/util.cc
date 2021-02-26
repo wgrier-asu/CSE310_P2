@@ -21,15 +21,15 @@ void print_app_names(bst *root){
  * Description: Recursive function; prints all apps within a given category by in-order traversal
  * Input: root of a category's BST
  * */
-void print_apps_query(categories *cat){
+void print_apps_query(categories cat){
     // Case 1: no apps in this category
-    if(cat->root == NULL){
-        cout << "Category " << cat->category << " no apps found." << endl;
+    if(cat.root == NULL){
+        cout << "Category " << cat.category << " no apps found." << endl;
     }
         // Case 2: print all apps
     else{
-        cout << "Category: " << cat->category << endl;
-        print_app_names(cat->root);
+        cout << "Category: " << cat.category << endl;
+        print_app_names(cat.root);
     }
 }
 
@@ -70,17 +70,16 @@ void printIfPrice(bst *root, float priceKey){
  * Input: category to search
  * Description: finds and prints the app with the maximum price in the selected category
  * */
-void find_max_price_query(categories *cat){
+void find_max_price_query(categories cat){
     // Case 1: no BST has been established
-    if(cat->root == NULL) cout << "Category " << cat->category << " no apps found." << endl;
+    if(cat.root == NULL) cout << "Category " << cat.category << " no apps found." << endl;
         // Case 2: Find the max and print
     else{
         // Get number of apps in the category
-        int c = count(cat->root);
-
+        int c = count(cat.root);
         // Allocate heap of size c and initialize with price data
         float *heap = new float[c];
-        allocatePriceHeap(heap, c, 0, cat->root);
+        allocatePriceHeap(heap, c, 0, cat.root);
 
         // MaxHeapify the heap
         buildMaxHeap(heap, c);
@@ -96,8 +95,8 @@ void find_max_price_query(categories *cat){
         delete []heap;
 
         // Search and print all apps with the maximum price
-        cout << "Category: " << cat->category << endl;
-        printIfPrice(cat->root, maxPrice);
+        cout << "Category: " << cat.category << endl;
+        printIfPrice(cat.root, maxPrice);
     }
 }
 

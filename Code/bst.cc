@@ -1,7 +1,8 @@
 #include <cmath>
+#include <iostream>
 #include <cstring>
 #include "defn.h"
-
+using namespace std;
 
 int left(int p){
     return 2*p;
@@ -52,22 +53,84 @@ int count(bst *root){
     }
 }
 
-void deleteNode(bst *node){
-    // do something
+
+
+bst * min(bst *root){
+    // Base: no more elements less than root
+    if(root->left==NULL) return root;
+    // Recursive: find left (smaller) child
+    else return min(root->left);
+}
+bst * max(bst *root){
+    // Base: no more elements greater than root
+    if(root->right==NULL) return root;
+    // Recursive: find right (larger) child
+    else return max(root->right);
+}
+bst * successor(bst * root){
+    return min(root->right);
+}
+bst * predecessor(bst *root){
+    return max(root->left);
 }
 
 /* deleteTree
- * Description: deallocates memory of BST in post-order */
-void deleteTree(bst *root){
-    // Delete children recursively
-    if(root->left != NULL) {
-        deleteTree(root->left);
+ * Description: Deletes an entire BST
+ * Return: NULL root node
+ * */
+bst * deleteTree(bst *root){
+    // Case 0: No tree
+    if(root == NULL) return NULL;
+    // Case 1: Delete Children, Delete Root, Return Null
+    else{
+        root->right = deleteTree(root->right);
+        root->left = deleteTree(root->left);
+        delete [] root;
+        root = NULL;
+        return root;
     }
-    if(root->right != NULL) {
-        deleteTree(root->right);
+}
+
+/* deleteNode
+ * Description: deletes the object corresponding to the input key
+ * Return: root of BST
+ * */
+bst * deleteNode(char *key, bst * root){
+    // Case 0: Tree doesn't exist
+    if(root == NULL) return NULL; // returns NULL tree
+    // Case 1: Key is right of (greater than) root
+    else if(strcasecmp(key,root->record.app_name) > 0) root->right = deleteNode(key, root->right);
+    // Case 2: Key is left of (lesser than) root
+    else if(strcasecmp(key, root->record.app_name) < 0) root->left = deleteNode(key, root->left);
+    // Case 3: Key is at root, delete
+    else{
+        // Case 3.1: Key is at leaf node or has right child only
+        if(root->left == NULL){
+            bst * newRoot = root->right; // right could be NULL or root of subtree
+            delete [] root;
+            root = NULL;
+            return newRoot;
+        }
+        // Case 3.2: Key has left child only, return left child as new root
+        else if(root->right == NULL){
+            bst *newRoot = root->left;
+            delete [] root;
+            root = NULL;
+            return newRoot;
+        }
+        // Case 3.3: Key has both children
+        //          Set new root to predecessor value; delete predecessor leaf node
+        else{
+            // Find predecessor (leaf node)
+            bst * pred = predecessor(root);
+            // Copy values to root
+            root->record = pred->record;
+            // Delete predecessor by recursion, finds leaf node and deletes
+            root->left = deleteNode(pred->record.app_name, root->left);
+            // Return new root (same root, but different values; structure unchanged)
+        }
     }
-    // Delete Root
-    delete root;
+    return root;
 }
 
 /* heightTree
@@ -78,8 +141,8 @@ int heightTree(bst *root){
         int heightLeft  = 1 + heightTree(root->left);
         int heightRight = 1 + heightTree(root->right);
 
-        if(heightLeft > heightRight) return heightRight;
-        else return heightLeft;
+        if(heightLeft > heightRight) return heightLeft;
+        else return heightRight;
     }
 }
 

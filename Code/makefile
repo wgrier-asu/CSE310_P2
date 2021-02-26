@@ -1,7 +1,7 @@
 all: myAppStore
 
-myAppStore: main.o util.o bst.o heap.o
-	g++ main.cpp util.o bst.o heap.o -o myAppStore
+myAppStore: main.o util.o bst.o heap.o hash.o prime.o
+	g++ main.cpp util.o bst.o heap.o hash.o prime.o -o myAppStore
 
 main.o: main.cpp defn.h
 	g++ main.cpp defn.h -c

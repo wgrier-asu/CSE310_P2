@@ -8,8 +8,8 @@
 
 bst * insertBST(bst *root, bst *obj);
 int count(bst *root);
-void deleteTree(bst *root);
-void deleteNode(bst *node);
+bst * deleteTree(bst *root);
+bst * deleteNode(char *key, bst *root);
 int heightTree(bst *root);
 int left  (int p);
 int right (int p);

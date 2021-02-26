@@ -8,10 +8,10 @@
 #include "bst.h"
 
 void print_app_names(bst *root);
-void print_apps_query(categories *cat);
+void print_apps_query(categories cat);
 int allocatePriceHeap(float *heap, int size, int pos, bst *root);
 void printIfPrice(bst *root, float priceKey);
-void find_max_price_query(categories *cat);
+void find_max_price_query(categories cat);
 int getQType(std::string query, int qLength);
 void printAppInfo(app_info *info);
 void printAppInfo(app_info info);

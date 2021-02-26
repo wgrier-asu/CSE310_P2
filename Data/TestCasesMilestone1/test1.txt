@@ -27,9 +27,10 @@ Game of Life Classic Edition
 15.3
 MB
 0.99
-3
+5
 print-apps category "Social Networking"
 print-apps category "Games"
-find max price apps "Games"
+delete "Games" "Game of Life Classic Edition"
+find app "Game of Life Classic Edition"
+print-apps category "Games"
 no report
-

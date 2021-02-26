@@ -1326,13 +1326,9 @@ AccuWeather
 60.3
 MB
 0.00
-8
-print-apps category "Utilities"
-print-apps category "Weather"
-print-apps category "Books"
-print-apps category "Food & Drink"
-find max price apps "Navigation"
-find max price apps "Reference"
-find max price apps "News"
-find app "WolframAlpha"
+4
+print-apps category "Business"
+delete "Weather" "doTERRA"
+find app "doTERRA"
+print-apps category "Business"
 no report

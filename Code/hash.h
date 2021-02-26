@@ -9,6 +9,6 @@ int getHTSize(int m);
 int h(char *name);
 bool insertHash(hash_table_entry **table, bst *obj);
 bst * searchHashTable(hash_table_entry ** table, char *name);
-bool deleteEntry(hash_table_entry **table, char *name);
+bool deleteEntry(hash_table_entry **table, char *name, char *category);
 void printAllAt(hash_table_entry **table, int index);
 #endif //CSE310_P2_HASH_H

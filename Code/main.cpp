@@ -14,16 +14,17 @@ int main() {
     int n;     // number of categories
     cin >> n;  // get input
     cin.get(); // clear line
-    categories *app_categories [n]; // Create array of n categories
+    categories *app_categories = new categories[n*sizeof(categories)]; // Create array of n categories
 
     // Initialize each category structure with name and BST (null)
     char *catName = new char[CAT_NAME_LEN];
     for(int i=0; i<n; i++){
-        app_categories[i] = new categories[sizeof(categories)];
         cin.getline(catName, CAT_NAME_LEN);
-        strcpy(app_categories[i]->category, catName);
-        app_categories[i]->root = NULL;
+        strcpy(app_categories[i].category, catName);
+        app_categories[i].root = NULL;
     }
+    delete [] catName;
+    catName = NULL;
 
     // Get # of Applications
     int tmpLength = 100;
@@ -33,11 +34,9 @@ int main() {
     sscanf(tmp, "%d", &m);
 
     // Create Hash Table
-    hash_table_entry **hash_table;
     int table_size = getHTSize(m);
-    hash_table = new hash_table_entry*[table_size*sizeof(hash_table_entry)];
+    hash_table_entry **hash_table = new hash_table_entry*[table_size*sizeof(hash_table_entry)];
     for(int i=0; i<table_size; i++) hash_table[i] = NULL;
-
 
 
     // Initialize the BSTs
@@ -63,21 +62,22 @@ int main() {
         memset(tmp, 0, 100);
 
         // Create BST from app info
-        bst * newBST = new bst[sizeof(bst)];
+        bst *newBST = new bst[sizeof(bst)];
         newBST->record = *newInfo;
         newBST->right = NULL;
         newBST->left = NULL;
 
         // Insert the new BST into the correct category's binary search tree
         for(int i=0; i<n; i++){
-            if(strcmp(newBST->record.category, app_categories[i]->category) == 0){
-                app_categories[i]->root = insertBST(app_categories[i]->root, newBST);
+            if(strcmp(newBST->record.category, app_categories[i].category) == 0){
+                app_categories[i].root = insertBST(app_categories[i].root, newBST);
             }
         }
 
         // Insert the new BST into the hash table
         insertHash(hash_table, newBST);
     }
+
 
 
 
@@ -135,7 +135,7 @@ int main() {
             // Process Query with <inputCategory>
             bool DNE = true; // Does not exist = true
             for(int i=0; i<n; i++){
-                if(strcmp(app_categories[i]->category,inputCategory)==0){
+                if(strcmp(app_categories[i].category,inputCategory)==0){
                     DNE = false;
                     find_max_price_query(app_categories[i]); // Print if category exists
                 }
@@ -154,7 +154,7 @@ int main() {
             // Process Query with <inputCategory>
             bool DNE = true; // Does not exist = true
             for(int i=0; i<n; i++){
-                if(strcmp(app_categories[i]->category,inputCategory)==0){
+                if(strcmp(app_categories[i].category,inputCategory)==0){
                     DNE = false;
                     print_apps_query(app_categories[i]);
                 }
@@ -175,22 +175,67 @@ int main() {
         }
         // delete <category> <app_name>
         else if(qType == 7){
+            // Get input category from the query
+            int startOfCat = query.find('\"') + 1;
+            int endOfCat = query.find('\"',startOfCat);
+            int catLength = endOfCat - startOfCat;
+            string iCat = query.substr(startOfCat, catLength);
+            char *inputCategory = new char[CAT_NAME_LEN];
+            strcpy(inputCategory, iCat.c_str());
 
+            // Get input app_name from the query
+            int startOfName = query.find('\"',endOfCat+1) + 1;
+            int endOfName = query.find('\"',startOfName);
+            int nameLength = endOfName - startOfName;
+            string iName = query.substr(startOfName, nameLength);
+            char *inputName = new char[APP_NAME_LEN];
+            strcpy(inputName, iName.c_str());
+
+
+            // Check existence of category
+            bool DNE = true; // Does not exist = true
+            int catNum;
+            for(int i=0; i<n; i++){
+                if(strcmp(app_categories[i].category,inputCategory)==0){
+                    DNE = false;
+                    catNum = i;
+                }
+            }
+            // Category doesn't exist; quit query processing
+            if(DNE){cout << "Application " << inputName << " not found in category " << inputCategory << "; unable to delete." << endl;}
+            // Category exists; proceed with delete function
+            else{
+                // Deleted entry from hash table
+                bool deleted = deleteEntry(hash_table, inputName, inputCategory);
+                // Delete bst object from category BST
+                app_categories[catNum].root = deleteNode(inputName, app_categories[catNum].root);
+
+                // Successful Deletion
+                if(deleted){
+                    cout << "Application " << inputName << " from Category " << inputCategory << " successfully deleted." << endl;
+                }
+                // Failed Deletion
+                else{
+                    cout << "Application " << inputName << " not found in category " << inputCategory << "; unable to delete." << endl;
+                }
+            }
         }
+        // Query Not Recognized
         else{
             cout << "--invalid query #" << currQ+1 << "--" << endl;
         }
-
 
         // Move to next query
         currQ++;
     }
 
+
     // Report Setting Output
     // Get "no report" or "report" from stdin
     cin.getline(tmp, tmpLength);
     string temp = tmp;
-    int reportVal = temp.find("no");
+    delete [] tmp;
+    int reportVal = temp.find("no report");
     bool report = true;
     if(reportVal > -1 && reportVal < tmpLength) report = false;
 
@@ -198,12 +243,12 @@ int main() {
         // BST Statistics:
         cout << "BST Statistics" << endl;
         for (int i=0; i<n; i++){
-            cout << "\t" << app_categories[i]->category << endl;
+            cout << "\t" << app_categories[i].category << endl;
 
-            int totalCount = count(app_categories[i]->root);
+            int totalCount = count(app_categories[i].root);
             cout << "\t\tTotal Nodes: " << totalCount << endl;
 
-            int height = heightTree(app_categories[i]->root);
+            int height = heightTree(app_categories[i].root);
             cout << "\t\tHeight: " << height << endl;
 
             if(totalCount == 0){
@@ -213,10 +258,10 @@ int main() {
                 cout << "\t\tNo Subtrees Exist." << endl;
             }
             else{
-                int heightL = heightTree(app_categories[i]->root->left);
+                int heightL = heightTree(app_categories[i].root->left);
                 cout << "\t\tHeight of Left Subtree: " << heightL << endl;
 
-                int heightR = heightTree(app_categories[i]->root->right);
+                int heightR = heightTree(app_categories[i].root->right);
                 cout << "\t\tHeight of Right Subtree: " << heightR << endl;
             }
         }
@@ -231,13 +276,13 @@ int main() {
 
 
 
-
     // Free Memory and Exit
 
     for(int i=0; i<n; i++){
-        if(app_categories[i]->root != NULL) deleteTree(app_categories[i]->root);
+        if(app_categories[i].root != NULL) app_categories[i].root = deleteTree(app_categories[i].root);
     }
-    delete [] *app_categories;
+    delete [] app_categories;
+
 
     return 0;
 }

@@ -83,24 +83,37 @@ void printAllAt(hash_table_entry **table, int index){
     }
 }
 
-bool deleteEntry(hash_table_entry **table, char *name){
+bool deleteEntry(hash_table_entry **table, char *name, char *category){
     int position = h(name);
-    // Case 0: Not Found - no entries at the position in the table
-    if(table[position] == NULL) return NULL;
-    // Case 1: Search Row for the app name
+
+    hash_table_entry *finder = table[position];
+    // Case 0: No entries at table[position];
+    if(finder == NULL) return false;
+    // Case 1: The first entry matches (both name and category)
+    else if(strcmp(finder->app_name, name) == 0 && strcmp(finder->app_node->record.category, category) == 0){
+        // Set Head to finder.next
+        table[position] = finder->next;
+        delete [] finder;
+        return true;
+    }
+    // Case 2: the first entry does not match, search linked list
     else{
-        hash_table_entry *finder = table[position];
-        // Search Row until
-        while(finder->next != NULL && strcmp(finder->next->app_name, name) != 0){
+        // Iterate until finder.next matches or end-of-list reached
+        while(finder->next!=NULL && !(strcmp(finder->next->app_name, name)==0 && strcmp(finder->next->app_node->record.category, category)==0)){
             finder = finder->next;
         }
-        // Case 1.1: Not Found - reached end of linked list
-        if(finder->next == NULL) return NULL;
-        // Case 1.2: Found - Delete
+        // Case 2.1: End-of-list, not found
+        if(finder->next == NULL) return false;
+        // Case 2.2: Delete finder->next
         else{
-            deleteNode(finder->next->app_node);
-            finder->next = finder->next->next;
-            delete finder->next;
+            hash_table_entry *found = finder->next;
+            // Set finder.next (remove pointer to found from linked list)
+            finder->next = found->next;
+            // Delete hash_table_entry
+            delete [] found;
+            found = NULL;
+
+            return true;
         }
     }
 }
