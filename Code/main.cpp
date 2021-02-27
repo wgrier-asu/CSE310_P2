@@ -1,9 +1,13 @@
 #include <iostream>
 #include <cstring>
 #include <cstdio>
+#include <chrono>
+#include <iomanip>
 #include "util.h"
 #include "hash.h"
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wc++20-extensions"
 using namespace std;
 
 int main() {
@@ -27,19 +31,19 @@ int main() {
     // Get # of Applications
     int tmpLength = 100;
     char *tmp = new char[tmpLength];
-    int m; // # of applications
+    int numApps; // # of applications
     cin.getline(tmp,tmpLength);
-    sscanf(tmp, "%d", &m);
+    sscanf(tmp, "%d", &numApps);
 
 
     // Create Hash Table
-    int table_size = getHTSize(m);
+    int table_size = getHTSize(numApps);
     hash_table_entry **hash_table = new hash_table_entry*[table_size*sizeof(hash_table_entry)];
     for(int i=0; i<table_size; i++) hash_table[i] = NULL;
 
 
     // Initialize the BSTs
-    for(int i=0; i<m; i++){
+    for(int i=0; i<numApps; i++){
         // Create and fill app_info structure
         app_info *newInfo = new app_info[sizeof(app_info)];
 
@@ -393,9 +397,70 @@ int main() {
             }
         }
 
+
         // Hash Table Statistics:
+        cout << "\nHash Table Statistics" << endl;
+        double hash_m = table_size;
+        double hash_n = 0;           // should equal numApps
+        int chainLength [numApps+1]; // Stores one length value per possible number of apps per linked list; Range:(0,numApps)
+        int maxLength;
+        // Fill lengthArray with the number of lists per length l, 0<l<m
+        for(int i=0; i<=numApps; i++){ // m = # of applications (local variable)
+            chainLength[i] = listsWithLength(hash_table, table_size, i);
+
+            // Reset maxLength if applicable
+            if(chainLength[i] > 0) maxLength = i;
+        }
+        // Print Length Data
+        cout << "Chain Length\t# of Lists" << endl;
+        for(int length=0; length<=maxLength; length++){
+            cout << "\t\t   " << length << "\t\t\t" << chainLength[length] << endl;
+
+            hash_n = hash_n + length*chainLength[length];
+        }
+        cout << "Max Length = " << maxLength << endl;
+        cout << "n = " << hash_n << endl;
+        cout << "m = " << hash_m << endl;
+        double alpha = hash_n/hash_m;
+        printf("Load Factor = %.3f\n", alpha);
 
         // find app <app_name> - hash v. BST running time comparison
+        // Clock function code inspired by https://www.geeksforgeeks.org/measure-execution-time-function-cpp/
+        cout << "\nfind app <app_name> Running Time Comparison:" << endl;
+        // Set Arbitrary app_name to search
+        int categoryIndex = 0;
+        while(categoryIndex < n && app_categories[categoryIndex].root == NULL) {
+            categoryIndex++;
+        }
+        if(categoryIndex == n) cout << "Cannot conduct experiment: no applications loaded." << endl;
+        else{
+            bst *query_bst = app_categories[categoryIndex].root;
+            char *query_name = query_bst->record.app_name;
+            cout << "Searching for: " << query_name << " in Category " << query_bst->record.category << endl;
+            // Hash Table Running Time:
+            cout << "\tHash Table Running Time: ";
+
+            auto start = std::chrono::system_clock::now();
+            bst* hash_return = searchHashTable(hash_table, query_name);
+            auto end = std::chrono::system_clock::now();
+
+            auto hash_time = std::chrono::duration<double, nano>(end-start);
+            cout << hash_time.count() << " nanoseconds" << endl;
+
+            // BST Running Time:
+            cout << "\tBinary Search Tree Running Time: ";
+
+
+
+            auto start2 = std::chrono::system_clock::now();
+            bst* bst_return = searchNode(query_name, app_categories[categoryIndex].root);
+            auto end2 = std::chrono::system_clock::now();
+
+            auto bst_time = std::chrono::duration<double, nano>(end2-start2);
+            cout << bst_time.count() << " nanoseconds" << endl;
+        }
+
+
 
     }
 
@@ -404,12 +469,24 @@ int main() {
 
 
     // Free Memory and Exit
-
+    //      BST
     for(int i=0; i<n; i++){
         if(app_categories[i].root != NULL) app_categories[i].root = deleteTree(app_categories[i].root);
     }
     delete [] app_categories;
+    //      Hash Table
+    for(int j=0; j<table_size; j++){
+        while(hash_table[j] != NULL){
+            hash_table_entry *tempEntry;
+            tempEntry = hash_table[j];
 
+            hash_table[j] = hash_table[j]->next;
+
+            delete [] tempEntry;
+        }
+    }
+    delete [] hash_table;
 
     return 0;
 }
+#pragma clang diagnostic pop

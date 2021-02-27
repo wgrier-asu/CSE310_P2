@@ -1333,4 +1333,4 @@ find app "doTERRA"
 print-apps category "Business"
 range "Business" name "A" "B"
 range "Business" price 0.00 10.00
-no report
+report

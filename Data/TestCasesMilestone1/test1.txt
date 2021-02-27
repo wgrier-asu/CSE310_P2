@@ -34,8 +34,8 @@ find price free "Games"
 range "Games" "A" "F"
 print-apps category "Social Networking"
 range "Games" price 0.00 5.00
-delete "Games" "Minecraft: Pocket Edition"
+delete "Games" "Minecraft:"
 print-apps category "Business"
 find max price apps "Games"
 find app "Minecraft: Pocket Edition"
-no report
+report

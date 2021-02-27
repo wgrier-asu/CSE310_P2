@@ -4,6 +4,27 @@
 #include "prime.h"
 #include "bst.h"
 
+/* countAt (int i)
+ * Counts the number of elements in a given linked list pointed to by the hash table */
+int countAt (hash_table_entry *head){
+    int count = 0;
+    while(head != NULL){
+        count ++;
+        head = head->next;
+    }
+    return count;
+}
+
+/* listsWithLength
+ * Returns the number of lists with linked list length (int length) */
+int listsWithLength(hash_table_entry **table, int table_size, int length){
+    int count = 0;
+    for(int i=0; i<table_size; i++){
+        if(countAt(table[i]) == length) count ++;
+    }
+    return count;
+}
+
 /* getHTSize
  * Description: computes the size of the hash table for a given number of elements m */
 int getHTSize(int m){
@@ -83,6 +104,8 @@ void printAllAt(hash_table_entry **table, int index){
     }
 }
 
+/* deleteEntry
+ * Uses hash function to find table index, then conducts linear search on linked list */
 bool deleteEntry(hash_table_entry **table, char *name, char *category){
     int position = h(name);
 

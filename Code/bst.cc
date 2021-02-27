@@ -56,7 +56,6 @@ int count(bst *root){
 }
 
 
-
 bst * min(bst *root){
     // Base: no more elements less than root
     if(root->left==NULL) return root;
@@ -140,6 +139,17 @@ bst * deleteNode(char *key, bst * root){
         }
     }
     return root;
+}
+
+/* searchNode
+ * Description: searches for and returns a node based on key app_name
+ * */
+bst * searchNode(char *key, bst *root){
+    // Case 0: Tree doesn't exist
+    if(root == NULL) return NULL;
+    else if(strcmp(key, root->record.app_name) == 0) return root;
+    else if(strcmp(key, root->record.app_name) < 0) return searchNode(key, root->left);
+    else return searchNode(key, root->right);
 }
 
 /* heightTree
