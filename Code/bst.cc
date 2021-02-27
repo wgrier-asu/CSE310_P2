@@ -25,7 +25,9 @@ bst * insertBST(bst *root, bst *obj){
         return root;
     }
     // Case 2: new object is greater than root, insert into right child
-    if(strcasecmp(obj->record.app_name,root->record.app_name) > 0){
+    // Lexicographic (case-sensitive) - use strcmp
+    // Alphabetical (case-insensitive) - use strcasecmp -- also change Delete()
+    if(strcmp(obj->record.app_name,root->record.app_name) > 0){
         root->right = insertBST(root->right, obj);
     }
     // Case 3: new object is lesser than root, insert into left child
@@ -68,10 +70,17 @@ bst * max(bst *root){
     else return max(root->right);
 }
 bst * successor(bst * root){
+    if(root->right != NULL) return min(root->right);
+    else{
+        return root; // WRONG: see implementation (see OneNote)
+    }
     return min(root->right);
 }
 bst * predecessor(bst *root){
-    return max(root->left);
+    if(root->left != NULL) return max(root->left);
+    else{
+        return root; // WRONG: (see OneNote)
+    }
 }
 
 /* deleteTree
@@ -99,9 +108,9 @@ bst * deleteNode(char *key, bst * root){
     // Case 0: Tree doesn't exist
     if(root == NULL) return NULL; // returns NULL tree
     // Case 1: Key is right of (greater than) root
-    else if(strcasecmp(key,root->record.app_name) > 0) root->right = deleteNode(key, root->right);
+    else if(strcmp(key,root->record.app_name) > 0) root->right = deleteNode(key, root->right);
     // Case 2: Key is left of (lesser than) root
-    else if(strcasecmp(key, root->record.app_name) < 0) root->left = deleteNode(key, root->left);
+    else if(strcmp(key, root->record.app_name) < 0) root->left = deleteNode(key, root->left);
     // Case 3: Key is at root, delete
     else{
         // Case 3.1: Key is at leaf node or has right child only

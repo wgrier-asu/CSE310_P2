@@ -9,33 +9,28 @@ using namespace std;
 /* print_app_names
  * Description: helper function to print_apps_query; Prints names of BST nodes by in-order traversal;
  *      In-order traversal yields alphabetical printing order. */
-void print_app_names(bst *root){
+void print_app_names_in_order(bst *root){
     // Print left child's subtree
-    if(root->left != NULL) print_app_names(root->left);
+    if(root->left != NULL) print_app_names_in_order(root->left);
     // Print root app's name
     cout << "\t" << root->record.app_name << endl;
     // Print right child's subtree
-    if(root->right != NULL) print_app_names(root->right);
+    if(root->right != NULL) print_app_names_in_order(root->right);
 }
+
 /* Query: Print_Apps category <category_name>
  * Description: Recursive function; prints all apps within a given category by in-order traversal
  * Input: root of a category's BST
  * */
-void print_apps_query(categories cat){
+void print_apps_query(bst *root){
     // Case 1: no apps in this category
-    if(cat.root == NULL){
-        cout << "Category " << cat.category << " no apps found." << endl;
-    }
-        // Case 2: print all apps
-    else{
-        cout << "Category: " << cat.category << endl;
-        print_app_names(cat.root);
-    }
+    if(root == NULL) return;
+    // Case 2: print all apps
+    else print_app_names_in_order(root); // in-order traversal
 }
 
-
 /* allocatePriceHeap
- * Description: uses in-order traversal of a BST to copy price values into a heap
+ * Description: uses in-order traversal of a BST to copy price values into a heap (array)
  * */
 int allocatePriceHeap(float *heap, int size, int pos, bst *root){
     // Left Sub-tree
@@ -51,35 +46,33 @@ int allocatePriceHeap(float *heap, int size, int pos, bst *root){
     }
     return pos; // return recursively to ensure heap position is continuously incremented
 }
+
 /* printIfPrice
- * Description: prints the app name if its price matches the priceKey */
+ * Description: searches and prints the app name if its price matches the priceKey
+ * In-order traversal */
 void printIfPrice(bst *root, float priceKey){
     // Left Sub-tree
-    if(root->left != NULL){
-        printIfPrice(root->left, priceKey);
-    }
+    if(root->left != NULL) printIfPrice(root->left, priceKey);
     // Print Node if price matches priceKey
     if(root->record.price == priceKey) cout << "\t" << root->record.app_name <<endl;
     // Right Sub-tree
-    if(root->right != NULL){
-        printIfPrice(root->right, priceKey);
-    }
+    if(root->right != NULL) printIfPrice(root->right, priceKey);
 }
 
 /* Query: find max price <category>
  * Input: category to search
  * Description: finds and prints the app with the maximum price in the selected category
  * */
-void find_max_price_query(categories cat){
+void find_max_price_query(bst * root){
     // Case 1: no BST has been established
-    if(cat.root == NULL) cout << "Category " << cat.category << " no apps found." << endl;
-        // Case 2: Find the max and print
+    if(root == NULL) return;
+    // Case 2: Find the max and print
     else{
         // Get number of apps in the category
-        int c = count(cat.root);
+        int c = count(root);
         // Allocate heap of size c and initialize with price data
         float *heap = new float[c];
-        allocatePriceHeap(heap, c, 0, cat.root);
+        allocatePriceHeap(heap, c, 0, root);
 
         // MaxHeapify the heap
         buildMaxHeap(heap, c);
@@ -95,13 +88,93 @@ void find_max_price_query(categories cat){
         delete []heap;
 
         // Search and print all apps with the maximum price
-        cout << "Category: " << cat.category << endl;
-        printIfPrice(cat.root, maxPrice);
+        printIfPrice(root, maxPrice);
     }
 }
 
+/* Print_range_in_order; float keys
+ * Print app_names in-order traversal between char keys low and high */
+void print_range_in_order(bst *root, float low, float high){
+    // Left Sub-tree
+    if(root->left != NULL && root->left->record.price >= low) print_range_in_order(root->left, low, high);
+    // Root
+    cout << "\t" << root->record.app_name << endl;
+    // Right Sub-tree
+    if(root->right != NULL && root->right->record.price <= high) print_range_in_order(root->right, low, high);
+}
 
+/* print_in_range for float-type key
+ * Description: manages under/overflow for searching and printing all with app_name in range (low,high)
+ * In-order traversal */
+bool print_in_range(bst *root, float low, float high){
+    bool OutOfRange;
+    // If root doesn't exist, or we've reached end of branch
+    if(root==NULL) {
+        OutOfRange = true;
+    }
+    // Find maximum root if current root is too high
+    //      Returns true if entire tree is out of range
+    else if(root->record.price > high){
+        OutOfRange = print_in_range(root->left, low, high);
+    }
+    // Find minimum root, if current root is too low
+    //      Returns true if entire tree is out of range
+    else if(root->record.price < low){
+        OutOfRange = print_in_range(root->right, low, high);
+    }
+    // Element is in range
+    //      In-Order Traversal and Print
+    else{
+        OutOfRange = false;
+        cout << "Applications in Price Range (";
+        printf("$%.2f",low);
+        cout << ", ";
+        printf("$%.2f", high);
+        cout << ") in Category: " << root->record.category << endl;
+        print_range_in_order(root, low, high);
+    }
+    return OutOfRange;
+}
 
+/* Print_range_in_order; char keys
+ * Print app_names in-order traversal between char keys low and high */
+void print_range_in_order(bst *root, char low, char high){
+    // Left Sub-tree
+    if(root->left != NULL && root->left->record.app_name[0] >= low) print_range_in_order(root->left, low, high);
+    // Root
+    cout << "\t" << root->record.app_name << endl;
+    // Right Sub-tree
+    if(root->right != NULL && root->right->record.app_name[0] <= high) print_range_in_order(root->right, low, high);
+}
+
+/* print_in_range for char key
+ * Description: manages under/overflow for searching and printing all with app_name in range (low,high)
+ * */
+bool print_in_range(bst *root, char low, char high){
+    bool OutOfRange;
+    // If root doesn't exist, or we've reached end of branch
+    if(root==NULL) {
+        OutOfRange = true;
+    }
+    // Find maximum root if current root is too high
+    //      Returns true if entire tree is out of range
+    else if(root->record.app_name[0] > high){
+        OutOfRange = print_in_range(root->left, low, high);
+    }
+    // Find minimum root, if current root is too low
+    //      Returns true if entire tree is out of range
+    else if(root->record.app_name[0] < low){
+        OutOfRange = print_in_range(root->right, low, high);
+    }
+    // Element is in range
+    //      In-Order Traversal and Print
+    else{
+        OutOfRange = false;
+        cout << "Applications in Range (" << low << ", " << high << ") in Category: " << root->record.category << endl;
+        print_range_in_order(root, low, high);
+    }
+    return OutOfRange;
+}
 
 /* getQType
  * Examines a query input and returns an integer corresponding to requested operation
@@ -143,7 +216,6 @@ int getQType(string query, int qLength){
     return qType;
 }
 
-
 /* printAppInfo
  * Description: prints all data within an app_info object */
 void printAppInfo(app_info *info){
@@ -154,13 +226,14 @@ void printAppInfo(app_info *info){
     cout << "\t" << info->units <<endl;
     cout << "\t" << info->price <<endl;
 }
+
 /* printAppInfo
  * Description: prints all data within an app_info object */
 void printAppInfo(app_info info){
-    cout << "\t" << info.category <<endl;
-    cout << "\t" << info.app_name <<endl;
-    cout << "\t" << info.version   << endl;
-    cout << "\t" << info.size <<endl;
-    cout << "\t" << info.units   <<endl;
-    cout << "\t" << info.price <<endl;
+    cout << "\tCategory: " << info.category <<endl;
+    cout << "\tApp Name: " << info.app_name <<endl;
+    cout << "\tVersion: " << info.version   << endl;
+    cout << "\tSize: " << info.size <<endl;
+    cout << "\tUnits: " << info.units   <<endl;
+    printf("\tPrice: $%.2f\n",info.price);
 }

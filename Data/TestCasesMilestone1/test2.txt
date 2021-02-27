@@ -1326,9 +1326,11 @@ AccuWeather
 60.3
 MB
 0.00
-4
+6
 print-apps category "Business"
 delete "Weather" "doTERRA"
 find app "doTERRA"
 print-apps category "Business"
+range "Business" name "A" "B"
+range "Business" price 0.00 10.00
 no report

@@ -1,7 +1,7 @@
 all: myAppStore
 
 myAppStore: main.o util.o bst.o heap.o hash.o prime.o
-	g++ main.cpp util.o bst.o heap.o hash.o prime.o -o myAppStore
+	g++ main.cpp util.cc bst.cc heap.cc hash.cc prime.cc -o myAppStore
 
 main.o: main.cpp defn.h
 	g++ main.cpp defn.h -c
@@ -20,7 +20,6 @@ hash.o: hash.cc hash.h
 
 prime.o: prime.cc prime.h
 	g++ prime.cc prime.h -c
-
 
 clean:
 	rm *.o

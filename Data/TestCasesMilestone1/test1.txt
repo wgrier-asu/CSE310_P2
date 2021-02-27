@@ -27,10 +27,15 @@ Game of Life Classic Edition
 15.3
 MB
 0.99
-5
+10
+find app "Minecraft: Pocket Edition"
+print-apps category "Medical"
+find price free "Games"
+range "Games" "A" "F"
 print-apps category "Social Networking"
-print-apps category "Games"
-delete "Games" "Game of Life Classic Edition"
-find app "Game of Life Classic Edition"
-print-apps category "Games"
+range "Games" price 0.00 5.00
+delete "Games" "Minecraft: Pocket Edition"
+print-apps category "Business"
+find max price apps "Games"
+find app "Minecraft: Pocket Edition"
 no report

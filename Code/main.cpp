@@ -1,8 +1,6 @@
 #include <iostream>
 #include <cstring>
 #include <cstdio>
-#include <cmath>
-
 #include "util.h"
 #include "hash.h"
 
@@ -32,6 +30,7 @@ int main() {
     int m; // # of applications
     cin.getline(tmp,tmpLength);
     sscanf(tmp, "%d", &m);
+
 
     // Create Hash Table
     int table_size = getHTSize(m);
@@ -77,9 +76,6 @@ int main() {
         // Insert the new BST into the hash table
         insertHash(hash_table, newBST);
     }
-
-
-
 
 
     // Read and Process Queries
@@ -133,14 +129,23 @@ int main() {
             const char *inputCategory = iCat.c_str();
 
             // Process Query with <inputCategory>
-            bool DNE = true; // Does not exist = true
+            int instruction = 0;
+            int catNum;
             for(int i=0; i<n; i++){
                 if(strcmp(app_categories[i].category,inputCategory)==0){
-                    DNE = false;
-                    find_max_price_query(app_categories[i]); // Print if category exists
+                    if(app_categories[i].root == NULL) instruction = 1;
+                    else{ instruction = 2; catNum = i;}
                 }
             }
-            if(DNE){cout << "Category " << inputCategory << " not found." << endl;}
+            // Case 0: No Category Exists
+            if(instruction == 0){cout << "Category " << inputCategory << " not found." << endl;}
+            // Case 1: Category BST is Empty
+            else if(instruction ==1){cout << "Category " << inputCategory << " no apps found." << endl;}
+            // Case 2: Execute Query
+            else{
+                cout << "Maximum Priced Applications in Category: " << inputCategory << endl;
+                find_max_price_query(app_categories[catNum].root);
+            }
         }
         // print-apps <category>
         else if(qType == 3){
@@ -152,26 +157,144 @@ int main() {
             const char *inputCategory = iCat.c_str();
 
             // Process Query with <inputCategory>
-            bool DNE = true; // Does not exist = true
+            int instruction = 0;
+            int catNum;
             for(int i=0; i<n; i++){
                 if(strcmp(app_categories[i].category,inputCategory)==0){
-                    DNE = false;
-                    print_apps_query(app_categories[i]);
+                    if(app_categories[i].root == NULL) instruction = 1;
+                    else{ instruction = 2; catNum = i;}
                 }
             }
-            if(DNE){cout << "Category " << inputCategory << " not found." << endl;}
+            // Case 0: No Category Exists
+            if(instruction == 0){cout << "Category " << inputCategory << " not found." << endl;}
+            // Case 1: Category BST is Empty
+            else if(instruction ==1){cout << "Category " << inputCategory << " no apps found." << endl;}
+            // Case 2: Execute Query
+            else{
+                cout << "Category: " << inputCategory << endl;
+                print_apps_query(app_categories[catNum].root);
+            }
         }
         // find price free <category>
         else if(qType == 4){
+            // Get input category from the query
+            int startOfCat = query.find('\"') + 1;
+            int endOfCat = query.find('\"',startOfCat);
+            int catLength = endOfCat - startOfCat;
+            string iCat = query.substr(startOfCat, catLength);
+            const char *inputCategory = iCat.c_str();
 
+            // Process Query with <inputCategory>
+            int instruction = 0;
+            int catNum;
+            for(int i=0; i<n; i++){
+                if(strcmp(app_categories[i].category,inputCategory)==0){
+                    if(app_categories[i].root == NULL) instruction = 1;
+                    else{ instruction = 2; catNum = i;}
+                }
+            }
+            if(instruction == 0){cout << "Category " << inputCategory << " not found." << endl;}
+            else if(instruction == 1){cout << "Category " << inputCategory << " no free apps found." << endl;}
+            else{
+                cout << "Free apps in Category: " << inputCategory << endl;
+                float price = 0;
+                printIfPrice(app_categories[catNum].root, price);
+            }
         }
         // range <category> price <low> <high>
         else if(qType == 5){
+            // Get input category from the query
+            int startOfCat = query.find('\"') + 1;
+            int endOfCat = query.find('\"',startOfCat);
+            int catLength = endOfCat - startOfCat;
+            string iCat = query.substr(startOfCat, catLength);
+            char *inputCategory = new char[CAT_NAME_LEN];
 
+            if (iCat.empty()) strcpy(inputCategory, "EMPTY");
+            else strcpy(inputCategory, iCat.c_str());
+
+            // Get input low from the query
+            int startOfRange = query.find('e', endOfCat+1) + 1;
+            int endOfRange = query.find('\n', startOfRange+1);
+            int rangeLength = endOfRange - startOfRange;
+            string iRange = query.substr(startOfRange, rangeLength);
+
+            float low, high;
+            sscanf(iRange.c_str(), "%f %f", &low, &high);
+
+            // Process Query with <inputCategory>
+            int instruction = 0;
+            int catNum;
+            for(int i=0; i<n; i++){
+                if(strcmp(app_categories[i].category,inputCategory)==0){
+                    if(app_categories[i].root == NULL) instruction = 1;
+                    else{ instruction = 2; catNum = i;}
+                }
+            }
+            // Case 0: Category doesn't exist
+            if(instruction == 0)cout << "Category "<<inputCategory<<" not found."<<endl;
+            // Case 1: Category BST is Empty
+            else if(instruction == 1)
+                {cout <<"No applications found in "<<inputCategory<<" for the given price range ("<<low<<","<< high<<")"<<endl;}
+            else{
+                bool OutOfRange = print_in_range(app_categories[catNum].root, low, high);
+                // Case 2: The entire tree is out of range
+                if(OutOfRange){
+                    cout << "No applications found in " << inputCategory <<" for the given price range ("<<low<<","<<high<<")"<<endl;
+                }
+                // Case 3: (implicit in print_in_range query call) elements within tree are in range
+            }
         }
         // range <category> name <low> <high>
         else if(qType == 6){
+            // Get input category from the query
+            int startOfCat = query.find('\"') + 1;
+            int endOfCat = query.find('\"',startOfCat);
+            int catLength = endOfCat - startOfCat;
+            string iCat = query.substr(startOfCat, catLength);
+            char *inputCategory = new char[CAT_NAME_LEN];
 
+            if (iCat.empty()) strcpy(inputCategory, "EMPTY");
+            else strcpy(inputCategory, iCat.c_str());
+
+            // Get input low from the query
+            int startOfLow = query.find('\"',endOfCat+1) + 1;
+            int endOfLow = query.find('\"',startOfLow);
+            int lowLength = endOfLow - startOfLow;
+            string iLow = query.substr(startOfLow, lowLength);
+            char low = '~';
+            if(!iLow.empty()) low = iLow.at(0);
+
+            // Get input high from the query
+            int startOfHigh = query.find('\"',endOfLow+1) + 1;
+            int endOfHigh= query.find('\"',startOfHigh);
+            int highLength = endOfHigh - startOfHigh;
+            string iHigh = query.substr(startOfHigh, highLength);
+            char high = '~';
+            if(!iHigh.empty()) high = iHigh.at(0);
+
+            // Process Query with <inputCategory>
+            int instruction = 0;
+            int catNum;
+            for(int i=0; i<n; i++){
+                if(strcmp(app_categories[i].category,inputCategory)==0){
+                    if(app_categories[i].root == NULL) instruction = 1;
+                    else{ instruction = 2; catNum = i;}
+                }
+            }
+            // Case 0: Category doesn't exist
+            if(instruction == 0)cout << "Category "<<inputCategory<<" not found."<<endl;
+                // Case 1: Category BST is Empty
+            else if(instruction == 1)
+            {cout <<"No applications found in "<<inputCategory<<" for the given range ("<<low<<","<< high<<")"<<endl;}
+            else{
+                bool OutOfRange = print_in_range(app_categories[catNum].root, low, high);
+                // Case 2: The entire tree is out of range
+                if(OutOfRange){
+                    cout << "No applications found in " << inputCategory <<" for the given range ("<<low<<","<<high<<")"<<endl;
+                }
+                // Case 3: (implicit in print_in_range query call) elements within tree are in range
+            }
         }
         // delete <category> <app_name>
         else if(qType == 7){
@@ -181,7 +304,9 @@ int main() {
             int catLength = endOfCat - startOfCat;
             string iCat = query.substr(startOfCat, catLength);
             char *inputCategory = new char[CAT_NAME_LEN];
-            strcpy(inputCategory, iCat.c_str());
+
+            if (iCat.empty()) strcpy(inputCategory, "EMPTY");
+            else strcpy(inputCategory, iCat.c_str());
 
             // Get input app_name from the query
             int startOfName = query.find('\"',endOfCat+1) + 1;
@@ -189,7 +314,9 @@ int main() {
             int nameLength = endOfName - startOfName;
             string iName = query.substr(startOfName, nameLength);
             char *inputName = new char[APP_NAME_LEN];
-            strcpy(inputName, iName.c_str());
+
+            if(iName.empty()) strcpy(inputName, "EMPTY");
+            else strcpy(inputName, iName.c_str());
 
 
             // Check existence of category
