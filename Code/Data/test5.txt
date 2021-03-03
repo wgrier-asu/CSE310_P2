@@ -300,7 +300,7 @@ Uber
 59.1
 MB
 0.00
-24
+25
 find max price apps "Books"
 find max price apps "Business"
 find max price apps "Catalogs"

@@ -102,7 +102,7 @@ Mixologist
 22
 MB
 0.99
-24
+25
 print-apps category "Books"
 print-apps category "Business"
 print-apps category "Catalogs"

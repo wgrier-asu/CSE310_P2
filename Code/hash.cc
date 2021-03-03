@@ -1,8 +1,8 @@
 #include <iostream>
 #include <cstring>
 #include <cmath>
-#include "prime.h"
-#include "bst.h"
+#include "Headers/prime.h"
+#include "Headers/bst.h"
 
 /* countAt (int i)
  * Counts the number of elements in a given linked list pointed to by the hash table */
@@ -34,8 +34,8 @@ int getHTSize(int m){
 
 /* h - hash function
  * Hashes an app's name to a position in the hash table. */
-int h(char *name){
-    int k; // return value = sum(char[]) mod 11
+int h(char *name, int m){
+    int k; // return value = sum(char[]) mod m
 
     // Get sum
     int sum = 0;
@@ -48,14 +48,14 @@ int h(char *name){
         c = name[i];
     }
     // Compute remainder of sum / 11
-    k = (int)fmod(sum, 11);
+    k = (int)fmod(sum, m);
     return k;
 }
 
 /* insertHash
  * Description: inserts a new BST object into a row of the hash table. */
-bool insertHash(hash_table_entry **table, bst *obj){
-    int table_position = h(obj->record.app_name);
+bool insertHash(hash_table_entry **table, bst *obj, int table_size){
+    int table_position = h(obj->record.app_name, table_size);
 
     // Create New Table Entry Object and attach BST
     hash_table_entry *newEntry = new hash_table_entry[sizeof(hash_table_entry)];
@@ -74,8 +74,8 @@ bool insertHash(hash_table_entry **table, bst *obj){
 
 /* Query - find app <app_name>
  * Description: Returns the binary search tree pointer corresponding to the app_name.*/
-bst * searchHashTable(hash_table_entry ** table, char *name){
-    int position = h(name);
+bst * searchHashTable(hash_table_entry ** table, char *name, int table_size){
+    int position = h(name, table_size);
     // Case 0: Not Found - no entries at the position in the table
     if(table[position] == NULL) return NULL;
     // Case 1: Search Row for the app name
@@ -106,8 +106,8 @@ void printAllAt(hash_table_entry **table, int index){
 
 /* deleteEntry
  * Uses hash function to find table index, then conducts linear search on linked list */
-bool deleteEntry(hash_table_entry **table, char *name, char *category){
-    int position = h(name);
+bool deleteEntry(hash_table_entry **table, int table_size, char *name, char *category){
+    int position = h(name, table_size);
 
     hash_table_entry *finder = table[position];
     // Case 0: No entries at table[position];

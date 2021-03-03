@@ -12,12 +12,11 @@ Fit Men Cook
 81.8
 MB
 2.99
-7
+6
 find max price apps "Food & Drink"
 find max price apps "Books"
 find max price apps "Medical"
 print-apps category "Food & Drink"
 print-apps category "Business"
-delete "Food & Drink" "Fit Men Cook"
-range "Food"
 no report
+

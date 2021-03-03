@@ -1,7 +1,7 @@
 #include <cmath>
 #include <iostream>
 #include <cstring>
-#include "defn.h"
+#include "Headers/defn.h"
 using namespace std;
 
 int left(int p){
@@ -157,8 +157,11 @@ bst * searchNode(char *key, bst *root){
 int heightTree(bst *root){
     if(root == NULL) return 0;
     else{
-        int heightLeft  = 1 + heightTree(root->left);
-        int heightRight = 1 + heightTree(root->right);
+        int heightLeft = 0;
+        int heightRight = 0;
+        if(root->left != NULL) heightLeft = 1 + heightTree(root->left);
+        if(root->right != NULL) heightRight = 1 + heightTree(root->right);
+
 
         if(heightLeft > heightRight) return heightLeft;
         else return heightRight;

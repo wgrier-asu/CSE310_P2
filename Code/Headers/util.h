@@ -15,6 +15,5 @@ void find_max_price_query(bst *root);
 bool print_in_range(bst *root, char low, char high);
 bool print_in_range(bst *root, float low, float high);
 int getQType(std::string query, int qLength);
-void printAppInfo(app_info *info);
 void printAppInfo(app_info info);
 #endif //CSE310_P2_UTIL_H

@@ -1,9 +1,8 @@
 #include <iostream>
 #include <cstdio>
-#include "bst.h"
-#include "heap.h"
+#include "Headers/bst.h"
+#include "Headers/heap.h"
 using namespace std;
-
 
 
 /* print_app_names
@@ -13,7 +12,7 @@ void print_app_names_in_order(bst *root){
     // Print left child's subtree
     if(root->left != NULL) print_app_names_in_order(root->left);
     // Print root app's name
-    cout << "\t" << root->record.app_name << endl;
+    cout << "\t\t" << root->record.app_name << endl;
     // Print right child's subtree
     if(root->right != NULL) print_app_names_in_order(root->right);
 }
@@ -38,8 +37,13 @@ int allocatePriceHeap(float *heap, int size, int pos, bst *root){
         pos = allocatePriceHeap(heap, size, pos, root->left);
     }
     // Root node
-    heap[pos] = root->record.price;
+
+    if(root->record.price < 0.01) heap[pos] = 0;
+    else heap[pos] = root->record.price;
+
     pos++;
+
+
     // Right Sub-tree
     if(root->right != NULL){
         pos = allocatePriceHeap(heap, size, pos, root->right);
@@ -54,7 +58,7 @@ void printIfPrice(bst *root, float priceKey){
     // Left Sub-tree
     if(root->left != NULL) printIfPrice(root->left, priceKey);
     // Print Node if price matches priceKey
-    if(root->record.price == priceKey) cout << "\t" << root->record.app_name <<endl;
+    if(root->record.price == priceKey) cout << "\t\t" << root->record.app_name <<endl;
     // Right Sub-tree
     if(root->right != NULL) printIfPrice(root->right, priceKey);
 }
@@ -70,6 +74,7 @@ void find_max_price_query(bst * root){
     else{
         // Get number of apps in the category
         int c = count(root);
+
         // Allocate heap of size c and initialize with price data
         float *heap = new float[c];
         allocatePriceHeap(heap, c, 0, root);
@@ -80,12 +85,12 @@ void find_max_price_query(bst * root){
         // Get maximum price in the category
         float maxPrice = Max(heap);
         // Truncate price to 2 decimal places only (currency format)
-        char temp[10];
+        char temp[10] = "";
         sscanf(temp, "%.2f", maxPrice);
         sscanf(temp, "%f", &maxPrice);
 
         // Deallocate heap memory
-        delete []heap;
+        delete [] heap;
 
         // Search and print all apps with the maximum price
         printIfPrice(root, maxPrice);
@@ -98,7 +103,7 @@ void print_range_in_order(bst *root, float low, float high){
     // Left Sub-tree
     if(root->left != NULL && root->left->record.price >= low) print_range_in_order(root->left, low, high);
     // Root
-    cout << "\t" << root->record.app_name << endl;
+    cout << "\t\t" << root->record.app_name << endl;
     // Right Sub-tree
     if(root->right != NULL && root->right->record.price <= high) print_range_in_order(root->right, low, high);
 }
@@ -126,7 +131,7 @@ bool print_in_range(bst *root, float low, float high){
     //      In-Order Traversal and Print
     else{
         OutOfRange = false;
-        cout << "Applications in Price Range (";
+        cout << "\tApplications in Price Range (";
         printf("$%.2f",low);
         cout << ", ";
         printf("$%.2f", high);
@@ -142,7 +147,7 @@ void print_range_in_order(bst *root, char low, char high){
     // Left Sub-tree
     if(root->left != NULL && root->left->record.app_name[0] >= low) print_range_in_order(root->left, low, high);
     // Root
-    cout << "\t" << root->record.app_name << endl;
+    cout << "\t\t" << root->record.app_name << endl;
     // Right Sub-tree
     if(root->right != NULL && root->right->record.app_name[0] <= high) print_range_in_order(root->right, low, high);
 }
@@ -170,7 +175,7 @@ bool print_in_range(bst *root, char low, char high){
     //      In-Order Traversal and Print
     else{
         OutOfRange = false;
-        cout << "Applications in Range (" << low << ", " << high << ") in Category: " << root->record.category << endl;
+        cout << "\tApplications in Range (" << low << ", " << high << ") in Category: " << root->record.category << endl;
         print_range_in_order(root, low, high);
     }
     return OutOfRange;
@@ -181,59 +186,56 @@ bool print_in_range(bst *root, char low, char high){
  * Input: string query, int qLength (length of query)
  * Output: integer */
 int getQType(string query, int qLength){
-    // qType = index found in ordered list in P2 description document
-    int qType = -1;
-    int loc = -1;
+    // return int = index found in ordered list in P2 description document
+    int loc;
 
     // 1. find app
     loc = query.find("find app");
-    if(loc > -1 && loc < qLength) qType = 1;
+    if(loc > -1 && loc < qLength) return 1;
 
     // 2. find max price apps
     loc = query.find("find max price apps");
-    if(loc > -1 && loc < qLength) qType = 2;
+    if(loc > -1 && loc < qLength) return 2;
 
     // 3. print-apps category
     loc = query.find("print-apps category");
-    if(loc > -1 && loc < qLength) qType = 3;
+    if(loc > -1 && loc < qLength) return 3;
 
     // 4. find price free
     loc = query.find("find price free");
-    if(loc > -1 && loc < qLength) qType = 4;
+    if(loc > -1 && loc < qLength) return 4;
 
     // 5-6. range
     loc = query.find("range");
     if(loc > -1 && loc < qLength) {
         loc = query.find("price");
-        if(loc > -1 && loc < qLength) qType = 5; // range price
-        else qType = 6;                          // range app
+        if(loc > -1 && loc < qLength) return 5; // range price
+        else return 6;                          // range app
     }
 
     // 7. delete
     loc = query.find("delete");
-    if(loc > -1 && loc < qLength) qType = 7;
+    if(loc > -1 && loc < qLength) return 7;
 
-    return qType;
+    // 8. no report
+    loc = query.find("report");
+    if(loc > -1 && loc < qLength) {
+        loc = query.find("no");
+        if(loc > -1 && loc < qLength) return 8; // no report
+        else return 9; // report
+    }
+
+    return -1; // invalid query = -1
 }
 
-/* printAppInfo
- * Description: prints all data within an app_info object */
-void printAppInfo(app_info *info){
-    cout << "\t" << info->category << endl;
-    cout << "\t" << info->app_name <<endl;
-    cout << "\t" << info->version <<endl;
-    cout << "\t" << info->size <<endl;
-    cout << "\t" << info->units <<endl;
-    cout << "\t" << info->price <<endl;
-}
 
 /* printAppInfo
  * Description: prints all data within an app_info object */
 void printAppInfo(app_info info){
-    cout << "\tCategory: " << info.category <<endl;
-    cout << "\tApp Name: " << info.app_name <<endl;
-    cout << "\tVersion: " << info.version   << endl;
-    cout << "\tSize: " << info.size <<endl;
-    cout << "\tUnits: " << info.units   <<endl;
-    printf("\tPrice: $%.2f\n",info.price);
+    cout << "\t\tCategory: " << info.category <<endl;
+    cout << "\t\tApp Name: " << info.app_name <<endl;
+    cout << "\t\tVersion: " << info.version   << endl;
+    cout << "\t\tSize: " << info.size <<endl;
+    cout << "\t\tUnits: " << info.units   <<endl;
+    printf("\t\tPrice: $%.2f\n",info.price);
 }

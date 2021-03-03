@@ -1,5 +1,6 @@
 #include <cmath>
-#include "bst.h"
+#include <iostream>
+#include "Headers/bst.h"
 
 float Max(float *heap){
     float max = heap[0];
@@ -23,15 +24,20 @@ void maxHeapify(float *heap, int pos, int size){
     }
 
     // Swap if current object is not the largest
-    if(largest != pos){
+    if(largest != pos && heap[largest] >= 0.01){
         float temp = heap[pos];
+
         heap[pos] = heap[largest];
         heap[largest] = temp;
         maxHeapify(heap, largest+1, size);
     }
 }
 
-
+void printHeap(float *heap, int size){
+    std::cout << "Heap: ";
+    for(int i=0; i<size; i++) std::cout << heap[i] << ", " ;
+    std::cout << std::endl;
+}
 float * buildMaxHeap(float *heap, int size){
     int firstParent = floor(size/2);
     for(int i=firstParent; i>0; i--){
