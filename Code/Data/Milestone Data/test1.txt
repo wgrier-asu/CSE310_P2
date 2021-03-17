@@ -30,5 +30,6 @@ MB
 4
 print-apps category "Social Networking"
 print-apps category "Games"
-find max price apps "Social Networking"
-report
+find max price apps "Games"
+no report
+

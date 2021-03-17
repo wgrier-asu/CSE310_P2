@@ -1,0 +1,43 @@
+1
+Weather
+4
+Weather
+NOAA Radar Pro
+3.7
+74
+MB
+1.99
+Weather
+Weather Live
+4.6
+79
+MB
+1.99
+Weather
+The Weather Channel
+6.12
+78.5
+MB
+7.00
+Weather
+AccuWeather
+8.5.4
+60.3
+MB
+3.00
+15
+find app "NOAA Radar Professional"
+find app "Weather Live Now"
+find app "AccuWeather -- Up to the Minute"
+find app "The Weather Channel -- Your Definitive Guide to the Weather"
+find price free "Books"
+range "Weather" price 0.99 1.99
+range "Weather" price 1.99 2.99
+range "Weather" app "A" "Z"
+range "Weather" app "A" "G"
+range "Weather" app "W" "Z"
+delete "Weather" "NOAA Radar Professional"
+delete "Weather" "NOAA Radar Professional"
+delete "Weather" "Weather Live Now"
+delete "Whether" "The Weather Channel"
+no report

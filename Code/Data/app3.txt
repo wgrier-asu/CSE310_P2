@@ -1,0 +1,26 @@
+6
+Books
+Business
+Food & Drink
+Games
+Medical
+Social Networking
+1
+Food & Drink
+Fit Men Cook
+1.3
+81.8
+MB
+2.99
+10
+find app "Minecraft: Pocket Edition"
+find app "Spruce"
+range "Food & Drink" app "A" "G"
+range "Food & Drink" price 1.00 5.00
+find price free "Food & Drink"
+find max price apps "Food & Drink"
+range "Games" price 1.00 5.00
+delete "Food & Drink" "Fit Men Cook"
+range "Food & Drink" app "A" "G"
+no report
+

@@ -16,10 +16,10 @@ void maxHeapify(float *heap, int pos, int size){
 
     // Find the largest value's position
     int largest = pos;
-    if(l <= size && heap[l] > heap[largest]){
+    if(l < size && heap[l] > heap[largest]){
         largest = l;
     }
-    if(r <= size && heap[r] > heap[largest]){
+    if(r < size && heap[r] > heap[largest]){
         largest = r;
     }
 

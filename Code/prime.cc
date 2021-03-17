@@ -47,5 +47,7 @@ int prime()
         else
             printf( "%d is not a prime.\n", p );
     }
+
+    return 1;
 }
 

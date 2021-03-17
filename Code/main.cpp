@@ -32,7 +32,8 @@ int main() {
     int numApps; // # of applications
     cin.getline(tmp,tmpLength);
     sscanf(tmp, "%d", &numApps);
-
+    delete [] tmp;
+    tmp = NULL;
 
     // Create Hash Table
     int table_size = getHTSize(numApps);
@@ -44,6 +45,7 @@ int main() {
     for(int i=0; i<numApps; i++){
         // Create and fill app_info structure
         app_info *newInfo = new app_info[sizeof(app_info)];
+        tmp = new char[tmpLength];
 
         // Category char[]
         cin.getline(newInfo->category, CAT_NAME_LEN);
@@ -52,17 +54,18 @@ int main() {
         // Version char[]
         cin.getline(newInfo->version, VERSION_LEN);
         // Size float
-        cin.getline(tmp, 100);
+        cin.getline(tmp, tmpLength);
         sscanf(tmp, "%f", &newInfo->size);
-        memset(tmp, 0, 100);
+        memset(tmp, 0, tmpLength);
         // Units char[]
         cin.getline(newInfo->units, UNIT_SIZE);
         // Price float
-        cin.getline(tmp, 100);
+        cin.getline(tmp, tmpLength);
         sscanf(tmp, "%f", &newInfo->price);
-        memset(tmp, 0, 100);
+        memset(tmp, 0, tmpLength);
 
         // Create BST from app info
+
         bst *newBST = new bst[sizeof(bst)];
         newBST->record = *newInfo;
         newBST->right = NULL;
@@ -77,21 +80,28 @@ int main() {
 
         // Insert the new BST into the hash table
         insertHash(hash_table, newBST, table_size);
+
+        delete [] tmp;
+        delete [] newInfo;
     }
 
 
     // Read and Process Queries
     int qLength = 200;
     int q; // # of Queries
+    tmp = new char[tmpLength];
     cin.getline(tmp, tmpLength);
     sscanf(tmp, "%d", &q); // Get number of queries q
     memset(tmp, 0, tmpLength);
+    delete [] tmp;
+
 
     char *queries[q]; // Array of size q to store q queries
     for(int i=0; i<q; i++){
         queries[i] = new char[qLength];
         cin.getline(queries[i], qLength); // Read each query into queries array
     }
+
 
     // Select and process each query
     int currQ = 0;
@@ -103,8 +113,7 @@ int main() {
         // Note: qType corresponds to ordered list found in P2 Description PDF on Canvas
 
         // Echo Query/Update
-        // cout << "Query/Update: " << query << endl; // Format Option #1
-        cout << query << endl; // Format Option #2
+        if(currQ < q-1) cout << query << endl; // Do not echo (no )report
 
         // find app <app_name>
         if(qType == 1){
@@ -120,11 +129,13 @@ int main() {
             bst * search = searchHashTable(hash_table, inputName, table_size);
 
             // Output
-            if(search == NULL) cout << "\tApplication " << inputName << " not found." << endl;
+            if(search == NULL) cout << "Application \"" << inputName << "\" not found." << endl;
             else{
-                cout << "\tFound Application: " << inputName << endl;
+                cout << "Found Application: \"" << inputName <<"\""<< endl;
                 printAppInfo(search->record);
             }
+
+            delete [] inputName;
         }
         // find max price apps <category>
         else if(qType == 2){
@@ -145,12 +156,12 @@ int main() {
                 }
             }
             // Case 0: No Category Exists
-            if(instruction == 0){cout << "\tCategory " << inputCategory << " not found." << endl;}
+            if(instruction == 0){cout << "Category \"" << inputCategory << "\" not found." << endl;}
             // Case 1: Category BST is Empty
-            else if(instruction ==1){cout << "\tCategory " << inputCategory << " no apps found." << endl;}
+            else if(instruction ==1){cout << "Category \"" << inputCategory << "\" no apps found." << endl;}
             // Case 2: Execute Query
             else{
-                cout << "\tCategory: " << inputCategory << endl;
+                cout << "Category: \"" << inputCategory <<"\""<< endl;
                 find_max_price_query(app_categories[catNum].root);
             }
         }
@@ -173,12 +184,12 @@ int main() {
                 }
             }
             // Case 0: No Category Exists
-            if(instruction == 0){cout << "\tCategory " << inputCategory << " not found." << endl;}
+            if(instruction == 0){cout << "Category \"" << inputCategory << "\" not found." << endl;}
             // Case 1: Category BST is Empty
-            else if(instruction ==1){cout << "\tCategory " << inputCategory << " no apps found." << endl;}
+            else if(instruction ==1){cout << "Category \"" << inputCategory << "\" no apps found." << endl;}
             // Case 2: Execute Query
             else{
-                cout << "\tCategory: " << inputCategory << endl;
+                cout << "Category: \"" << inputCategory <<"\""<< endl;
                 print_apps_query(app_categories[catNum].root);
             }
         }
@@ -200,12 +211,20 @@ int main() {
                     else{ instruction = 2; catNum = i;}
                 }
             }
-            if(instruction == 0){cout << "\tCategory " << inputCategory << " not found." << endl;}
-            else if(instruction == 1){cout << "\tCategory " << inputCategory << " no free apps found." << endl;}
+            if(instruction == 0){cout << "Category \"" << inputCategory << "\" not found." << endl;}
+            else if(instruction == 1){cout << "Category \"" << inputCategory << "\" no free apps found." << endl;}
             else{
-                cout << "\tFree apps in Category: " << inputCategory << endl;
                 float price = 0;
-                printIfPrice(app_categories[catNum].root, price);
+                bool exists = findPrice(app_categories[catNum].root, price);
+
+                if(exists){
+                    cout << "Free apps in Category: \"" << inputCategory <<"\""<< endl;
+                    printIfPrice(app_categories[catNum].root, price);
+                }
+                else{
+                    cout << "Category \"" << inputCategory << "\" no free apps found." << endl;
+                }
+
             }
         }
         // range <category> price <low> <high>
@@ -239,18 +258,30 @@ int main() {
                 }
             }
             // Case 0: Category doesn't exist
-            if(instruction == 0)cout << "\tCategory "<<inputCategory<<" not found."<<endl;
+            if(instruction == 0)cout << "Category \""<<inputCategory<<"\" not found."<<endl;
             // Case 1: Category BST is Empty
             else if(instruction == 1)
-                {cout <<"\tNo applications found in "<<inputCategory<<" for the given price range ("<<low<<","<< high<<")"<<endl;}
+                {cout << "No applications found in \"" << inputCategory <<"\" for the given price range (";
+                    printf("$%.2f,$%.2f).\n", low, high);}
             else{
-                bool OutOfRange = print_in_range(app_categories[catNum].root, low, high);
-                // Case 2: The entire tree is out of range
-                if(OutOfRange){
-                    cout << "\tNo applications found in " << inputCategory <<" for the given price range ("<<low<<","<<high<<")"<<endl;
+                // Check if any objects with in this range exist
+                bool exists = findInRange(app_categories[catNum].root, low, high);
+
+                // Case 2: Print elements in the price range
+                if(exists) {
+                    cout << "Applications in Price Range (";
+                    printf("$%.2f,$%.2f", low, high);
+                    cout << ") in Category: \"" << inputCategory <<"\""<< endl;
+                    print_range_in_order(app_categories[catNum].root, low, high);
                 }
-                // Case 3: (implicit in print_in_range query call) elements within tree are in range
+                // Case 3: No elements are within the price range
+                else{
+                    cout << "No applications found in \"" << inputCategory <<"\" for the given price range (";
+                    printf("$%.2f,$%.2f).\n", low, high);
+                }
             }
+
+            delete [] inputCategory;
         }
         // range <category> name <low> <high>
         else if(qType == 6){
@@ -269,16 +300,15 @@ int main() {
             int endOfLow = query.find('\"',startOfLow);
             int lowLength = endOfLow - startOfLow;
             string iLow = query.substr(startOfLow, lowLength);
-            char low = '~';
-            if(!iLow.empty()) low = iLow.at(0);
+            const char *lowChar = iLow.c_str();
 
             // Get input high from the query
             int startOfHigh = query.find('\"',endOfLow+1) + 1;
             int endOfHigh= query.find('\"',startOfHigh);
             int highLength = endOfHigh - startOfHigh;
             string iHigh = query.substr(startOfHigh, highLength);
-            char high = '~';
-            if(!iHigh.empty()) high = iHigh.at(0);
+            const char *highChar = iHigh.c_str();
+
 
             // Process Query with <inputCategory>
             int instruction = 0;
@@ -290,18 +320,20 @@ int main() {
                 }
             }
             // Case 0: Category doesn't exist
-            if(instruction == 0)cout << "\tCategory "<<inputCategory<<" not found."<<endl;
+            if(instruction == 0)cout << "Category \""<<inputCategory<<"\" not found."<<endl;
                 // Case 1: Category BST is Empty
             else if(instruction == 1)
-            {cout <<"\tNo applications found in "<<inputCategory<<" for the given range ("<<low<<","<< high<<")"<<endl;}
+            {cout <<"No applications found in \""<<inputCategory<<"\" for the given range ("<<lowChar<<","<<highChar<<")."<<endl;}
             else{
-                bool OutOfRange = print_in_range(app_categories[catNum].root, low, high);
+                bool OutOfRange = print_in_range(app_categories[catNum].root, lowChar, highChar);
                 // Case 2: The entire tree is out of range
                 if(OutOfRange){
-                    cout << "\tNo applications found in " << inputCategory <<" for the given range ("<<low<<","<<high<<")"<<endl;
+                    cout << "No applications found in \"" << inputCategory <<"\" for the given range ("<<lowChar<<","<<highChar<<")."<<endl;
                 }
                 // Case 3: (implicit in print_in_range query call) elements within tree are in range
             }
+
+            delete [] inputCategory;
         }
         // delete <category> <app_name>
         else if(qType == 7){
@@ -336,7 +368,7 @@ int main() {
                 }
             }
             // Category doesn't exist; quit query processing
-            if(DNE){cout << "\tApplication " << inputName << " not found in category " << inputCategory << "; unable to delete." << endl;}
+            if(DNE){cout << "Application \"" << inputName << "\" not found in category \"" << inputCategory << "\"; unable to delete." << endl;}
             // Category exists; proceed with delete function
             else{
                 // Deleted entry from hash table
@@ -346,20 +378,31 @@ int main() {
 
                 // Successful Deletion
                 if(deleted){
-                    cout << "\tApplication " << inputName << " from Category " << inputCategory << " successfully deleted." << endl;
+                    cout << "Application \"" << inputName << "\" from Category \"" << inputCategory << "\" successfully deleted." << endl;
                 }
                 // Failed Deletion
                 else{
-                    cout << "\tApplication " << inputName << " not found in category " << inputCategory << "; unable to delete." << endl;
+                    cout << "Application \"" << inputName << "\" not found in category \"" << inputCategory << "\"; unable to delete." << endl;
                 }
             }
+            delete [] inputName;
+            delete [] inputCategory;
         }
         else if(qType == 8) reportCommand = false;
         else if(qType == 9) reportCommand = true;
         // Unrecognized Query/Update
         else{
-            cout << "\t--invalid query #" << currQ+1 << "--" << endl;
+            cout << "Invalid Query #" << currQ+1 << ". Please use the following commands only:" << endl;
+            cout << "\tfind app <app_name>" << endl;
+            cout << "\tfind max price apps <category_name>" << endl;
+            cout << "\tprint-apps category <category_name>" << endl;
+            cout << "\tfind price free <category_name>" << endl;
+            cout << "\trange <category_name> price <low> <high>" << endl;
+            cout << "\trange <category_name> app <low> <high>" << endl;
+            cout << "\tdelete <category_name> <app_name>" << endl;
+            cout << "\t[no] report" << endl;
         }
+
 
         // Print Spacer
         cout << endl;
@@ -367,39 +410,42 @@ int main() {
         currQ++;
     }
 
+    // Deallocate Queries
+    for(int i=0; i<q; i++) delete [] queries[i];
 
+    /*
     // Report Output
     if(reportCommand){
         // BST STATISTICS:
-        cout << "BST Statistics" << endl;
-        cout << "\tNumber of Categories: " << numCategories << endl;
+        //cout << "BST Statistics" << endl;
+        //cout << "\tNumber of Categories: " << numCategories << endl;
         for (int i=0; i<numCategories; i++){
-            cout << "\t" << app_categories[i].category << endl;
+            //cout << "\t" << app_categories[i].category << endl;
 
             int totalCount = count(app_categories[i].root);
-            cout << "\t\tTotal Nodes: " << totalCount << endl;
+            //cout << "\t\tTotal Nodes: " << totalCount << endl;
 
             int height = heightTree(app_categories[i].root);
-            cout << "\t\tHeight: " << height << endl;
+            //cout << "\t\tHeight: " << height << endl;
 
             if(totalCount == 0){
-                cout << "\t\tNo Nodes Exist." << endl;
+                //cout << "\t\tNo Nodes Exist." << endl;
             }
             else if(height == 0){
-                cout << "\t\tNo Subtrees Exist." << endl;
+                //cout << "\t\tNo Subtrees Exist." << endl;
             }
             else{
                 int heightL = heightTree(app_categories[i].root->left);
-                cout << "\t\tHeight of Left Subtree: " << heightL << endl;
+                //cout << "\t\tHeight of Left Subtree: " << heightL << endl;
 
                 int heightR = heightTree(app_categories[i].root->right);
-                cout << "\t\tHeight of Right Subtree: " << heightR << endl;
+                //cout << "\t\tHeight of Right Subtree: " << heightR << endl;
             }
         }
 
 
         // HASH TABLE STATISTICS:
-        cout << "\nHash Table Statistics" << endl;
+        //cout << "\nHash Table Statistics" << endl;
         double hash_m = table_size;
         double hash_n = 0;           // should equal numApps
         int chainLength [numApps+1]; // Stores one length value per possible number of apps per linked list; Range:(0,numApps)
@@ -412,9 +458,9 @@ int main() {
             if(chainLength[i] > 0) maxLength = i;
         }
         // Print Length Data
-        cout << "\tChain Length\t# of Lists" << endl;
+        //cout << "\tChain Length\t# of Lists" << endl;
         for(int length=0; length<=maxLength; length++){
-            cout << "\t\t" << length << "\t\t" << chainLength[length] << endl;
+            //cout << "\t\t" << length << "\t\t" << chainLength[length] << endl;
 
             hash_n = hash_n + length*chainLength[length];
         }
@@ -425,14 +471,13 @@ int main() {
         printf("\tLoad Factor = %.3f\n", alpha);
 
 
-
         // RUNNING TIME ANALYSIS
         // find app <app_name> - hash v. BST running time comparison
         // Clock function code inspired by https://www.geeksforgeeks.org/measure-execution-time-function-cpp/
 
         // Set Arbitrary app_name to search
         char *query_name = new char[APP_NAME_LEN];
-        strcpy(query_name, "Fit Men Cook");
+        strcpy(query_name, "MLB.com At Bat");
         cout << "\nfind app \"" << query_name << "\" Running Time Comparison:" << endl;
 
         // Hash Table Running Time:
@@ -465,29 +510,34 @@ int main() {
             // Print Results
             cout << "\tHash Table Running Time: " << hash_time.count() << " nanoseconds" << endl;
             cout << "\tBinary Search Tree Running Time: " << bst_time.count() << " nanoseconds" << endl;
+
         }
         else{
             cout << "\tApplication " << query_name << " not found." << endl;
         }
+        delete [] query_name;
     }
+    */
+
 
 
     // Free Memory and Exit
     //      BST
     for(int i=0; i<numCategories; i++){
         if(app_categories[i].root != NULL) app_categories[i].root = deleteTree(app_categories[i].root);
+        delete [] app_categories[i].root;
     }
     delete [] app_categories;
     //      Hash Table
     for(int j=0; j<table_size; j++){
         while(hash_table[j] != NULL){
-            hash_table_entry *tempEntry;
-            tempEntry = hash_table[j];
+            hash_table_entry *tempEntry = hash_table[j];
 
             hash_table[j] = hash_table[j]->next;
 
             delete [] tempEntry;
         }
+        delete [] hash_table[j];
     }
     delete [] hash_table;
 

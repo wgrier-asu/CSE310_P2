@@ -59,10 +59,12 @@ bool insertHash(hash_table_entry **table, bst *obj, int table_size){
 
     // Create New Table Entry Object and attach BST
     hash_table_entry *newEntry = new hash_table_entry[sizeof(hash_table_entry)];
+    //hash_table_entry *newEntry;
     newEntry->app_node = obj;
     strcpy(newEntry->app_name, obj->record.app_name);
     newEntry->next = NULL;
 
+    // Insert at HEAD of Linked List
     if(table[table_position] == NULL) {
         table[table_position] = newEntry;
     }
@@ -70,6 +72,9 @@ bool insertHash(hash_table_entry **table, bst *obj, int table_size){
         newEntry->next = table[table_position];
         table[table_position] = newEntry;
     }
+
+
+    return true;
 }
 
 /* Query - find app <app_name>
