@@ -215,16 +215,22 @@ int main() {
             else if(instruction == 1){cout << "Category \"" << inputCategory << "\" no free apps found." << endl;}
             else{
                 float price = 0;
+
+                /* Implementation 1: prints list header even if the list is empty */
+                cout << "Free apps in category: \"" << inputCategory <<"\""<< endl;
+                printIfPrice(app_categories[catNum].root, price);
+
+                /* Implementation 2: does not print list if no objects with the right price are found
                 bool exists = findPrice(app_categories[catNum].root, price);
 
                 if(exists){
-                    cout << "Free apps in Category: \"" << inputCategory <<"\""<< endl;
+                    cout << "Free apps in category: \"" << inputCategory <<"\""<< endl;
                     printIfPrice(app_categories[catNum].root, price);
                 }
                 else{
                     cout << "Category \"" << inputCategory << "\" no free apps found." << endl;
                 }
-
+                */
             }
         }
         // range <category> price <low> <high>

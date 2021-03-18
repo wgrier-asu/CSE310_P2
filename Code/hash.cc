@@ -47,7 +47,7 @@ int h(char *name, int m){
         i++;
         c = name[i];
     }
-    // Compute remainder of sum / 11
+    // Compute remainder of sum / table size
     k = (int)fmod(sum, m);
     return k;
 }
