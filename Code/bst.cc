@@ -1,7 +1,7 @@
 #include <cmath>
 #include <iostream>
 #include <cstring>
-#include "Headers/defn.h"
+#include "Headers/hash.h"
 using namespace std;
 
 
@@ -67,6 +67,15 @@ bst *minParent(bst *x){
     else return minParent(x->left);
 }
 
+void copyRecord(bst *dest, bst *src){
+    strcpy(dest->record.category, src->record.category);
+    strcpy(dest->record.app_name, src->record.app_name);
+    strcpy(dest->record.version, src->record.version);
+    strcpy(dest->record.units, src->record.units);
+    dest->record.price = src->record.price;
+    dest->record.size = src->record.size;
+}
+
 
 /* searchNode
  * Description: searches for and returns a node based on key app_name
@@ -80,7 +89,7 @@ bst * searchNode(char *key, bst *root){
 }
 
 
-bst * delThisNode(bst *root) {
+bst * delThisNode(bst *root, int table_size, hash_table_entry **table) {
     // Case 0: NULL
     if(root == NULL) return root;
     // Case 1-2: Only Left Child Exists OR No Children
@@ -100,10 +109,27 @@ bst * delThisNode(bst *root) {
     // Case 4: Return successor
     else{
         bst *successorParent = minParent(root->right);
-        // Swap data
-        root->record = successorParent->left->record; // Root = Successor (data, maintain root's children)
-        delete [] successorParent->left;
-        successorParent->left = NULL;
+        bst *successor = successorParent;
+        // Case 1: successor has a parent that is not the root
+        if(successorParent->left != NULL){
+            successor = successorParent->left;
+            successorParent->left = NULL; // Remove successor from leaf
+            // Swap data
+            copyRecord(root, successor);
+        }
+        // Case 2: successor is the root's right child
+        else{
+            // Swap data
+            copyRecord(root, successor);
+
+            root->right = NULL; // remove successor from tree
+        }
+
+        delete [] successor;
+
+        // Rehash to new successor position (where root was)
+        rehash(root, table_size, table);
+
         return root;
     }
 }
@@ -112,18 +138,16 @@ bst * delThisNode(bst *root) {
  * Description: deletes the object corresponding to the input key
  * Return: root of BST
  * */
-bst * deleteNode(char *key, bst * root){
+bst * deleteNode(char *key, bst * root, int table_size, hash_table_entry **table){
     // Case 0: Tree doesn't exist
     if(root == NULL) return NULL; // returns NULL tree
     // Case 1: Key is right of (greater than) root
-    else if(strcmp(key,root->record.app_name) > 0) root->right = deleteNode(key, root->right);
+    else if(strcmp(key,root->record.app_name) > 0) root->right = deleteNode(key, root->right, table_size, table);
     // Case 2: Key is left of (lesser than) root
-    else if(strcmp(key, root->record.app_name) < 0) root->left = deleteNode(key, root->left);
+    else if(strcmp(key,root->record.app_name) < 0) root->left = deleteNode(key, root->left, table_size, table);
     // Case 3: Key is at root, delete
     else{
-        root = delThisNode(root);
-        if(root) cout << "new root: " << root->record.app_name << endl;
-        else cout << "deleted at a leaf" << endl;
+        root = delThisNode(root, table_size, table);
     }
     return root;
 }
@@ -165,4 +189,11 @@ int heightTree(bst *root){
     }
 }
 
+void InOrderTraversal(bst * root){
+    if(root != NULL){
+        if(root->left != NULL) InOrderTraversal(root->left);
+        cout << root->record.app_name << ", ";
+        if(root->right != NULL) InOrderTraversal(root->right);
+    }
+}
 

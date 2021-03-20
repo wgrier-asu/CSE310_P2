@@ -25,7 +25,7 @@ AccuWeather
 60.3
 MB
 1.99
-16
+17
 find app "NOAA Radar Pro"
 find app "Weather Live"
 find app "AccuWeather"
@@ -35,10 +35,11 @@ find price free "Weather"
 range "Weather" price 5.00 10.00
 range "Weather" price 0.99 1.99
 range "Weather" app "A" "Z"
-range "Weather" app "Weather" "Z"
+range "Weather" app "Weather " "Z"
 delete "Weather" "Weather Live"
+find app "The Weather Channel"
 delete "Weather" "NOAA Radar Pro"
 delete "Weather" "AccuWeather"
 delete "Weather" "The Weather Channel"
-find price free "Weather"
+print-apps category "Weather"
 no report

@@ -2,7 +2,7 @@
 #include <cstring>
 #include <cmath>
 #include "Headers/prime.h"
-#include "Headers/bst.h"
+#include "Headers/defn.h"
 
 /* countAt (int i)
  * Counts the number of elements in a given linked list pointed to by the hash table */
@@ -136,4 +136,17 @@ bool deleteEntry(hash_table_entry **table, int table_size, char *name, char *cat
             return true;
         }
     }
+}
+
+/* rehash
+ * If a node in the bst is changed, this function redefines the pointer from an element in the hash table */
+void rehash(bst *x, int table_size, hash_table_entry **table){
+    int i = h(x->record.app_name, table_size);
+
+    hash_table_entry *finder = table[i];
+    while(finder != NULL && strcmp(finder->app_name, x->record.app_name)!=0) finder = finder->next;
+    if(finder != NULL){
+        finder->app_node = x;
+    }
+
 }

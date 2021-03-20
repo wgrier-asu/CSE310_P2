@@ -4,7 +4,6 @@
 #include <chrono>
 #include <iomanip>
 #include "Headers/util.h"
-#include "Headers/hash.h"
 
 using namespace std;
 
@@ -34,6 +33,7 @@ int main() {
     sscanf(tmp, "%d", &numApps);
     delete [] tmp;
     tmp = NULL;
+
 
     // Create Hash Table
     int table_size = getHTSize(numApps);
@@ -327,7 +327,7 @@ int main() {
             }
             // Case 0: Category doesn't exist
             if(instruction == 0)cout << "Category \""<<inputCategory<<"\" not found."<<endl;
-                // Case 1: Category BST is Empty
+            // Case 1: Category BST is Empty
             else if(instruction == 1)
             {cout <<"No applications found in \""<<inputCategory<<"\" for the given range ("<<lowChar<<","<<highChar<<")."<<endl;}
             else{
@@ -380,7 +380,7 @@ int main() {
                 // Deleted entry from hash table
                 bool deleted = deleteEntry(hash_table, table_size, inputName, inputCategory);
                 // Delete bst object from category BST
-                app_categories[catNum].root = deleteNode(inputName, app_categories[catNum].root);
+                app_categories[catNum].root = deleteNode(inputName, app_categories[catNum].root, table_size, hash_table);
 
                 // Successful Deletion
                 if(deleted){
