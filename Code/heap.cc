@@ -1,6 +1,12 @@
 #include <cmath>
 #include <iostream>
-#include "Headers/bst.h"
+
+int left(int p){
+    return 2*p;
+}
+int right(int p){
+    return 2*p + 1;
+}
 
 float Max(float *heap){
     float max = heap[0];

@@ -531,7 +531,7 @@ int main() {
     //      BST
     for(int i=0; i<numCategories; i++){
         if(app_categories[i].root != NULL) app_categories[i].root = deleteTree(app_categories[i].root);
-        delete [] app_categories[i].root;
+        //delete [] app_categories[i].root;
     }
     delete [] app_categories;
     //      Hash Table
