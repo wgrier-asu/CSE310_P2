@@ -98,9 +98,12 @@ FOX Sports GO
 26.7
 MB
 0.00
-7
+10
 print-apps category "Weather"
 delete "Weather" "NOAA Radar Pro"
+delete "Weather" "The Weather Channel"
+delete "Weather" "AccuWeather"
+delete "Weather" "Weather Live"
 print-apps category "Weather"
 find app "AccuWeather"
 find app "Weather Live"

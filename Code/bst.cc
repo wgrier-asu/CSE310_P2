@@ -78,7 +78,7 @@ void copyRecord(bst *dest, bst *src){
 
 
 /* searchNode
- * Description: searches for and returns a node based on key app_name
+ * Description: searches for and returns a node based on a char array (key)
  * */
 bst * searchNode(char *key, bst *root){
     // Case 0: Tree doesn't exist
@@ -89,6 +89,11 @@ bst * searchNode(char *key, bst *root){
 }
 
 
+/* delThisNode
+ * Description: Deletes the input node (bst*root) from the tree &
+ *      deletes the corresponding link to the node in the hash table,
+ *      while also adjusting any hash table links to the successor if required.
+ *      */
 bst * delThisNode(bst *root, int table_size, hash_table_entry **table) {
     // Case 0: NULL
     if(root == NULL) return root;

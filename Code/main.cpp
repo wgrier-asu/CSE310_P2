@@ -3,6 +3,7 @@
 #include <cstdio>
 #include <chrono>
 #include <iomanip>
+#include <fstream>
 #include "Headers/util.h"
 
 using namespace std;
@@ -33,7 +34,6 @@ int main() {
     sscanf(tmp, "%d", &numApps);
     delete [] tmp;
     tmp = NULL;
-
 
     // Create Hash Table
     int table_size = getHTSize(numApps);
@@ -113,7 +113,7 @@ int main() {
         // Note: qType corresponds to ordered list found in P2 Description PDF on Canvas
 
         // Echo Query/Update
-        if(currQ < q-1) cout << query << endl; // Do not echo (no )report
+        cout << query << endl;
 
         // find app <app_name>
         if(qType == 1){
@@ -374,7 +374,10 @@ int main() {
                 }
             }
             // Category doesn't exist; quit query processing
-            if(DNE){cout << "Application \"" << inputName << "\" not found in category \"" << inputCategory << "\"; unable to delete." << endl;}
+            if(DNE){
+                //cout << "Application \"" << inputName << "\" not found in category \"" << inputCategory << "\"; unable to delete." << endl;
+                cout << "Category \""<<inputCategory<<"\" not found."<<endl;
+            }
             // Category exists; proceed with delete function
             else{
                 // Deleted entry from hash table
@@ -398,6 +401,7 @@ int main() {
         else if(qType == 9) reportCommand = true;
         // Unrecognized Query/Update
         else{
+            /*
             cout << "Invalid Query #" << currQ+1 << ". Please use the following commands only:" << endl;
             cout << "\tfind app <app_name>" << endl;
             cout << "\tfind max price apps <category_name>" << endl;
@@ -407,6 +411,7 @@ int main() {
             cout << "\trange <category_name> app <low> <high>" << endl;
             cout << "\tdelete <category_name> <app_name>" << endl;
             cout << "\t[no] report" << endl;
+            */
         }
 
 
@@ -419,39 +424,43 @@ int main() {
     // Deallocate Queries
     for(int i=0; i<q; i++) delete [] queries[i];
 
-    /*
+
     // Report Output
-    if(reportCommand){
+    if(reportCommand || 1){
+        // Creat new file for outputting statistics
+        string outFileName = "report.txt";
+        ofstream out;
+        out.open(outFileName);
         // BST STATISTICS:
-        //cout << "BST Statistics" << endl;
-        //cout << "\tNumber of Categories: " << numCategories << endl;
+        out << "BST Statistics" << endl;
+        out << "\tNumber of Categories: " << numCategories << endl;
         for (int i=0; i<numCategories; i++){
-            //cout << "\t" << app_categories[i].category << endl;
+            out << "\t" << app_categories[i].category << endl;
 
             int totalCount = count(app_categories[i].root);
-            //cout << "\t\tTotal Nodes: " << totalCount << endl;
+            out << "\t\tTotal Nodes: " << totalCount << endl;
 
             int height = heightTree(app_categories[i].root);
-            //cout << "\t\tHeight: " << height << endl;
+            out << "\t\tHeight: " << height << endl;
 
             if(totalCount == 0){
-                //cout << "\t\tNo Nodes Exist." << endl;
+                out << "\t\tNo Nodes Exist." << endl;
             }
             else if(height == 0){
-                //cout << "\t\tNo Subtrees Exist." << endl;
+                out << "\t\tNo Subtrees Exist." << endl;
             }
             else{
                 int heightL = heightTree(app_categories[i].root->left);
-                //cout << "\t\tHeight of Left Subtree: " << heightL << endl;
+                out << "\t\tHeight of Left Subtree: " << heightL << endl;
 
                 int heightR = heightTree(app_categories[i].root->right);
-                //cout << "\t\tHeight of Right Subtree: " << heightR << endl;
+                out << "\t\tHeight of Right Subtree: " << heightR << endl;
             }
         }
 
 
         // HASH TABLE STATISTICS:
-        //cout << "\nHash Table Statistics" << endl;
+        out << "\nHash Table Statistics" << endl;
         double hash_m = table_size;
         double hash_n = 0;           // should equal numApps
         int chainLength [numApps+1]; // Stores one length value per possible number of apps per linked list; Range:(0,numApps)
@@ -464,17 +473,18 @@ int main() {
             if(chainLength[i] > 0) maxLength = i;
         }
         // Print Length Data
-        //cout << "\tChain Length\t# of Lists" << endl;
+        out << "\tChain Length\t# of Lists" << endl;
         for(int length=0; length<=maxLength; length++){
-            //cout << "\t\t" << length << "\t\t" << chainLength[length] << endl;
+            out << "\t\t" << length << "\t\t" << chainLength[length] << endl;
 
             hash_n = hash_n + length*chainLength[length];
         }
-        cout << "\tMax Length = " << maxLength << endl;
-        cout << "\tn = " << hash_n << endl;
-        cout << "\tm = " << hash_m << endl;
+        out << "\tMax Length = " << maxLength << endl;
+        out << "\tn = " << hash_n << endl;
+        out << "\tm = " << hash_m << endl;
         double alpha = hash_n/hash_m;
-        printf("\tLoad Factor = %.3f\n", alpha);
+        out << setprecision(3) << "\tLoad Factor = " << alpha << endl;
+
 
 
         // RUNNING TIME ANALYSIS
@@ -483,47 +493,59 @@ int main() {
 
         // Set Arbitrary app_name to search
         char *query_name = new char[APP_NAME_LEN];
-        strcpy(query_name, "MLB.com At Bat");
-        cout << "\nfind app \"" << query_name << "\" Running Time Comparison:" << endl;
+
+        // Get name from random entry in table
+        int tableIndex = 0;
+        hash_table_entry *randEntry = hash_table[tableIndex];
+        while(tableIndex < hash_m-1 && randEntry == NULL) {
+            tableIndex++;
+            randEntry = hash_table[tableIndex];
+        }
+        // If the entire hash table is empty, conduct unsuccessful search
+        if(randEntry == NULL) strcpy(query_name, "Random Name App");
+        // Conduct successful search on random app name
+        else strcpy(query_name, randEntry->app_name);
+
+        out << "\nfind app \"" << query_name << "\" Running Time Comparison:" << endl;
+
 
         // Hash Table Running Time:
         auto start = std::chrono::system_clock::now();
-
         bst* hash_return = searchHashTable(hash_table, query_name, table_size);
         auto end = std::chrono::system_clock::now();
-
         auto hash_time = std::chrono::duration<double, nano>(end-start);
-        char *category = hash_return->record.category; // Extract Category from found object
 
-        // Search BST only if the app was found in the hash table
+        // Extract category from hash table entry to use in BST search
+        char *category = NULL;
+        if(hash_return != NULL) category = hash_return->record.category;
+
+        // BST Running Time:
+        auto start2 = std::chrono::system_clock::now();
+
+        int categoryIndex = -1;
         if(category != NULL){
-            // BST Running Time:
-            auto start2 = std::chrono::system_clock::now();
-
-            int categoryIndex = -1;
             for(int i=0; i<numCategories; i++){
                 if(strcmp(app_categories[i].category, category) == 0) categoryIndex = i;
             }
-
-            bst *bst_return = NULL;
-            if(categoryIndex == -1) cout << "\tCategory "<<category<<" not found."<<endl;
-            else bst_return = searchNode(query_name, app_categories[categoryIndex].root);
-
-            auto end2 = std::chrono::system_clock::now();
-            auto bst_time = std::chrono::duration<double, nano>(end2-start2);
-
-
-            // Print Results
-            cout << "\tHash Table Running Time: " << hash_time.count() << " nanoseconds" << endl;
-            cout << "\tBinary Search Tree Running Time: " << bst_time.count() << " nanoseconds" << endl;
-
         }
-        else{
-            cout << "\tApplication " << query_name << " not found." << endl;
-        }
+
+        bst *bst_return = NULL;
+        if(categoryIndex == -1) categoryIndex = 0; // Conduct unsuccessful search if category doesn't exist
+        bst_return = searchNode(query_name, app_categories[categoryIndex].root);
+
+        auto end2 = std::chrono::system_clock::now();
+        auto bst_time = std::chrono::duration<double, nano>(end2-start2);
+
+        // Print Results
+        if(bst_return == NULL) out << "\tUnsuccessful Search:" << endl;
+        else out << "\tSuccessful Search:" << endl;
+        out << "\tHash Table Running Time: " << hash_time.count() << " nanoseconds" << endl;
+        out << "\tBinary Search Tree Running Time: " << bst_time.count() << " nanoseconds" << endl;
+
         delete [] query_name;
+        out.close();
     }
-    */
+
 
 
 
@@ -531,7 +553,7 @@ int main() {
     //      BST
     for(int i=0; i<numCategories; i++){
         if(app_categories[i].root != NULL) app_categories[i].root = deleteTree(app_categories[i].root);
-        //delete [] app_categories[i].root;
+        delete [] app_categories[i].root;
     }
     delete [] app_categories;
     //      Hash Table

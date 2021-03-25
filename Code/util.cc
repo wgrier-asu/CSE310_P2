@@ -252,3 +252,4 @@ void printAppInfo(app_info info){
     cout << "\tUnits: " << info.units   <<endl;
     printf("\tPrice: $%.2f\n",info.price);
 }
+
